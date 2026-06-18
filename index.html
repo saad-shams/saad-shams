@@ -8,7 +8,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+<!-- ① Kill browser scroll restore — must be first -->
+<script>
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+</script>
 <style>
 /* ─── TOKENS ─── */
 :root {
@@ -511,10 +516,20 @@ body {
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 768px) {
+  #hero {
+  position: relative;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--warm);
+}
   .hero-inner {
     flex-direction: column;
     text-align: center;
     padding: 2rem;
+    padding-top: 8rem;
     gap: 2.5rem;
   }
   .hero-label { justify-content: center; }
@@ -569,7 +584,7 @@ body {
 .exp-sticky-wrap {
   /* NO position:sticky here — GSAP pin: true handles pinning */
   height: 100vh;
-  overflow: hidden;
+  /* overflow: hidden; */
   background: var(--paper);
   display: flex;
   flex-direction: column;
@@ -1618,7 +1633,7 @@ a.ft-info-val:hover { color: var(--gold); }
     </nav>
  
     <!-- Desktop CTA -->
-    <a href="https://wa.me/923104725492" target="_blank" rel="noopener" class="hd-cta">
+    <a href="https://wa.me/923001234567" target="_blank" rel="noopener" class="hd-cta">
       Hire me
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M2 6.5h9M7 2.5l4 4-4 4"/>
@@ -1643,7 +1658,7 @@ a.ft-info-val:hover { color: var(--gold); }
       <a href="#projects"       class="hd-nav-link">Projects</a>
       <a href="#education"  class="hd-nav-link">Education</a>
       <a href="#footer"    class="hd-nav-link">Contact</a>
-    <a href="https://wa.me/923104725492" target="_blank" rel="noopener" class="hd-drawer-cta">
+    <a href="https://wa.me/923001234567" target="_blank" rel="noopener" class="hd-drawer-cta">
       Hire me on WhatsApp →
     </a>
   </div>
@@ -2105,10 +2120,422 @@ a.ft-info-val:hover { color: var(--gold); }
 
 
 
-
-
-<!-- ─── SCRIPTS ─── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+(function () {
+  const header = document.getElementById('hdHeader');
+  const burger = document.getElementById('hdBurger');
+  const drawer = document.getElementById('hdDrawer');
+  const links  = drawer.querySelectorAll('.hd-drawer-link, .hd-drawer-cta');
+
+  function onScroll() {
+    header.classList.toggle('hd-scrolled', window.scrollY > 20);
+    const sections = ['experience','expv-section','projects','education','footer'];
+    let current = '';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 120) current = id;
+    });
+    document.querySelectorAll('.hd-nav-link').forEach(a => {
+      a.classList.toggle('hd-active', a.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  function toggleMenu(force) {
+    const isOpen = force !== undefined ? force : !header.classList.contains('hd-open');
+    header.classList.toggle('hd-open', isOpen);
+    burger.setAttribute('aria-expanded', isOpen);
+    drawer.setAttribute('aria-hidden', !isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+
+  burger.addEventListener('click', () => toggleMenu());
+  links.forEach(link => link.addEventListener('click', () => toggleMenu(false)));
+  document.addEventListener('click', e => {
+    if (header.classList.contains('hd-open') &&
+        !header.contains(e.target) &&
+        !drawer.contains(e.target)) toggleMenu(false);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && header.classList.contains('hd-open')) toggleMenu(false);
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768 && header.classList.contains('hd-open')) toggleMenu(false);
+  });
+})();
+
+/* ══════════════════════════════════════
+   LIGHTNING CURSOR
+══════════════════════════════════════ */
+const lCanvas = document.getElementById('lightning-canvas');
+const lCtx    = lCanvas.getContext('2d');
+let mouseX = -999, mouseY = -999, lastMouseX = -999, lastMouseY = -999;
+let bolts = [], sparkles = [];
+
+function resizeLCanvas() {
+  lCanvas.width  = window.innerWidth;
+  lCanvas.height = window.innerHeight;
+}
+resizeLCanvas();
+window.addEventListener('resize', resizeLCanvas);
+
+const ring = document.getElementById('cursor-ring');
+const dot  = document.getElementById('cursor-dot');
+
+document.addEventListener('mousemove', e => {
+  lastMouseX = mouseX; lastMouseY = mouseY;
+  mouseX = e.clientX; mouseY = e.clientY;
+  dot.style.left = mouseX + 'px';
+  dot.style.top  = mouseY + 'px';
+  const dx = mouseX - lastMouseX, dy = mouseY - lastMouseY;
+  const speed = Math.sqrt(dx*dx + dy*dy);
+  if (speed > 4 && lastMouseX !== -999) spawnBolt(lastMouseX, lastMouseY, mouseX, mouseY, speed);
+});
+
+document.addEventListener('click', e => {
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const len   = 60 + Math.random() * 60;
+    spawnBolt(e.clientX, e.clientY,
+      e.clientX + Math.cos(angle) * len,
+      e.clientY + Math.sin(angle) * len, 30);
+  }
+});
+
+let rX = 0, rY = 0;
+function animRing() {
+  rX += (mouseX - rX) * 0.12;
+  rY += (mouseY - rY) * 0.12;
+  ring.style.left = rX + 'px';
+  ring.style.top  = rY + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+function jaggify(x1, y1, x2, y2, roughness, depth) {
+  if (depth === 0) return [[x1, y1], [x2, y2]];
+  const mx = (x1+x2)/2 + (Math.random()-0.5)*roughness;
+  const my = (y1+y2)/2 + (Math.random()-0.5)*roughness;
+  return [...jaggify(x1,y1,mx,my,roughness/1.6,depth-1),
+          ...jaggify(mx,my,x2,y2,roughness/1.6,depth-1).slice(1)];
+}
+
+function spawnBolt(x1, y1, x2, y2, speed) {
+  const roughness   = Math.min(speed * 1.8, 50);
+  const points      = jaggify(x1, y1, x2, y2, roughness, 4);
+  const hasBranch   = Math.random() < 0.3;
+  let branchPoints  = null;
+  if (hasBranch && points.length > 4) {
+    const mid = Math.floor(points.length / 2);
+    branchPoints = jaggify(points[mid][0], points[mid][1],
+      points[mid][0] + (Math.random()-0.5)*60,
+      points[mid][1] + (Math.random()-0.5)*60, roughness*0.5, 3);
+  }
+  bolts.push({ points, branchPoints, alpha: 1,
+    decay: 0.06 + Math.random()*0.08,
+    width: 1.2 + Math.random()*1.2,
+    color: Math.random() < 0.2 ? '#d4aa6e' : '#b8955a' });
+  for (let i = 0; i < 3; i++) {
+    const pidx = Math.floor(Math.random() * (points.length-1));
+    sparkles.push({
+      x: points[pidx][0] + (Math.random()-0.5)*10,
+      y: points[pidx][1] + (Math.random()-0.5)*10,
+      r: 1+Math.random()*2, alpha: 1,
+      decay: 0.04+Math.random()*0.06,
+      vx: (Math.random()-0.5)*2, vy: (Math.random()-0.5)*2-1
+    });
+  }
+}
+
+function drawBolt(b) {
+  const pts = b.points;
+  if (pts.length < 2) return;
+  lCtx.save();
+  lCtx.globalAlpha = b.alpha * 0.3;
+  lCtx.strokeStyle = b.color;
+  lCtx.lineWidth   = b.width * 4;
+  lCtx.shadowColor = b.color;
+  lCtx.shadowBlur  = 12;
+  lCtx.beginPath();
+  lCtx.moveTo(pts[0][0], pts[0][1]);
+  pts.forEach(p => lCtx.lineTo(p[0], p[1]));
+  lCtx.stroke();
+  lCtx.restore();
+  lCtx.save();
+  lCtx.globalAlpha = b.alpha;
+  lCtx.strokeStyle = '#f5f1ea';
+  lCtx.lineWidth   = b.width * 0.6;
+  lCtx.lineJoin = 'round'; lCtx.lineCap = 'round';
+  lCtx.beginPath();
+  lCtx.moveTo(pts[0][0], pts[0][1]);
+  pts.forEach(p => lCtx.lineTo(p[0], p[1]));
+  lCtx.stroke();
+  lCtx.restore();
+  if (b.branchPoints) {
+    const bp = b.branchPoints;
+    lCtx.save();
+    lCtx.globalAlpha = b.alpha * 0.5;
+    lCtx.strokeStyle = b.color;
+    lCtx.lineWidth   = b.width * 0.5;
+    lCtx.beginPath();
+    lCtx.moveTo(bp[0][0], bp[0][1]);
+    bp.forEach(p => lCtx.lineTo(p[0], p[1]));
+    lCtx.stroke();
+    lCtx.restore();
+  }
+}
+
+function lightningLoop() {
+  lCtx.clearRect(0, 0, lCanvas.width, lCanvas.height);
+  bolts    = bolts.filter(b => b.alpha > 0.01);
+  bolts.forEach(b => { b.alpha = Math.max(0, b.alpha - b.decay); drawBolt(b); });
+  sparkles = sparkles.filter(s => s.alpha > 0.01);
+  sparkles.forEach(s => {
+    s.x += s.vx; s.y += s.vy;
+    s.alpha = Math.max(0, s.alpha - s.decay);
+    lCtx.save();
+    lCtx.globalAlpha = s.alpha;
+    lCtx.fillStyle   = '#b8955a';
+    lCtx.shadowColor = '#b8955a';
+    lCtx.shadowBlur  = 6;
+    lCtx.beginPath();
+    lCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    lCtx.fill();
+    lCtx.restore();
+  });
+  requestAnimationFrame(lightningLoop);
+}
+lightningLoop();
+
+/* ══════════════════════════════════════
+   SKILL TYPEWRITER
+══════════════════════════════════════ */
+const skills = ['Shopify Liquid','Theme Customization','Storefront Dev',
+                'Metafield Systems','Cart API','Shopify Flow','React','Video Editing','Wordpress'];
+const skillEl = document.getElementById('skill-display');
+let si = 0, ci = 0, deleting = false;
+
+function typeSkill() {
+  const word = skills[si];
+  if (!deleting) {
+    skillEl.textContent = word.slice(0, ci + 1);
+    ci++;
+    if (ci >= word.length) { deleting = true; setTimeout(typeSkill, 1800); return; }
+    setTimeout(typeSkill, 90);
+  } else {
+    skillEl.textContent = word.slice(0, ci - 1);
+    ci--;
+    if (ci <= 0) {
+      deleting = false;
+      si = (si + 1) % skills.length;
+      setTimeout(typeSkill, 300); return;
+    }
+    setTimeout(typeSkill, 45);
+  }
+}
+typeSkill();
+
+/* ══════════════════════════════════════
+   PROJECTS
+══════════════════════════════════════ */
+const projects = [
+  { id:'01', name:'Quickfoam',       nameEm:'',
+    client:'Quickfoam · UK',         category:'theme',
+    thumb:"url('/assets/quickfoam1.jpg')",
+    desc:'Full Shopify theme customization for a UK foam supplier. Built custom product configurator, campervan upholstery filter system, and optimised checkout flow for B2B and retail customers.',
+    tags:['Liquid','Theme Dev','Metafields'], url:'https://quickfoam.co.uk/' },
+  { id:'02', name:'Blond-Clo',       nameEm:'',
+    client:'Fashion Client',          category:'custom',
+    thumb:"url('/assets/blond-clo1.jpg')",
+    desc:'Bespoke Shopify theme built from scratch for a fashion brand. Includes custom insta posts, lookbook builder, and size guide metafield system.',
+    tags:['Custom Theme','Liquid','Metaobjects','Blocks'], url:'https://blondeclo.com/' },
+  { id:'03', name:'Web Development', nameEm:'',
+    client:'Lunax · Remote',          category:'custom',
+    thumb:"url('/assets/lunax1.jpg')",
+    desc:'Lunax Marketing is an AI-driven growth agency. Built a full marketing site with Supabase backend, conversion-focused design, and AI-powered insights.',
+    tags:['Supabase','UI Design & Development','JavaScript'], url:'https://www.lunaxmarketing.com/' },
+  { id:'04', name:'Impact',          nameEm:'',
+    client:'IT Agency',               category:'headless',
+    thumb:"url('/assets/impact360s.jpg')",
+    desc:'Modern WordPress website for an IT agency featuring custom design, service showcases, responsive layouts, contact forms, and SEO-friendly structure.',
+    tags:['Wordpress','Elementor','SEO'], url:'http://impact360s.com/' },
+  { id:'05', name:'Cart',            nameEm:'Optimisation',
+    client:'DTC Brand · Manchester',  category:'custom',
+    thumb:"linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.35)),url('/assets/quickfoam1.jpg')",
+    desc:'Cart API overhaul with custom upsell drawer, gift message system, discount stacking logic, and Shopify Flow automations for post-purchase sequences.',
+    tags:['Cart API','Shopify Flow','Liquid','JS'], url:'#' },
+  { id:'06', name:'Video Edits',     nameEm:'',
+    client:'International',           category:'migration',
+    thumb:"url('/assets/video-edit.jpg')",
+    desc:'Professional video editing for YouTube, Shorts, Reels, and social media. Skilled in cuts, transitions, audio sync, and content optimisation.',
+    tags:['Premiere Pro','Filmora','Social Media','Recaps'],
+    url:'https://drive.google.com/drive/folders/147y4vXeFnnGxhqDWNxG71liUO_DE2NAK?usp=drive_link' },
+];
+
+let activeFilter = 'all';
+
+function renderCards() {
+  const grid     = document.getElementById('projGrid');
+  grid.innerHTML = '';
+  const filtered = activeFilter === 'all' ? projects : projects.filter(p => p.category === activeFilter);
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="proj-empty">No projects in this category yet.</div>';
+    return;
+  }
+  filtered.forEach(p => {
+    const card       = document.createElement('div');
+    card.className   = 'proj-card';
+    card.innerHTML   = `
+      <div class="proj-card-thumb" style="background:${p.thumb};background-size:cover;background-position:center;">
+        <div class="proj-card-thumb-overlay"><div class="proj-view-btn">View Project</div></div>
+      </div>
+      <div class="proj-card-body">
+        <div class="proj-card-num">${p.id} / 0${projects.length}</div>
+        <div class="proj-card-name">${p.name}<em>${p.nameEm}</em></div>
+        <div class="proj-card-desc">${p.desc.slice(0,90)}…</div>
+        <div class="proj-card-tags">${p.tags.map(t=>`<span class="proj-card-tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="proj-card-footer">
+        <span class="proj-card-link">↗ View Project</span>
+        <span class="proj-card-type">${p.category}</span>
+      </div>`;
+    card.addEventListener('click', () => openModal(p));
+    grid.appendChild(card);
+  });
+}
+
+function openModal(p) {
+  const modalThumb = document.getElementById('modalThumb');
+  modalThumb.style.cssText = `background:${p.thumb};background-size:cover;background-position:center;height:220px;position:relative;`;
+  document.getElementById('modalNum').textContent    = p.id + ' / 0' + projects.length;
+  document.getElementById('modalName').innerHTML     = p.name + '<em>' + p.nameEm + '</em>';
+  document.getElementById('modalClient').textContent = p.client;
+  document.getElementById('modalDesc').textContent   = p.desc;
+  document.getElementById('modalTags').innerHTML     = p.tags.map(t=>`<span class="proj-modal-tag">${t}</span>`).join('');
+  document.getElementById('modalCta').onclick        = () => { if (p.url !== '#') window.open(p.url,'_blank'); };
+  document.getElementById('projModalBg').classList.add('open');
+}
+
+function closeModal() { document.getElementById('projModalBg').classList.remove('open'); }
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('projModalBg').addEventListener('click', e => {
+  if (e.target === document.getElementById('projModalBg')) closeModal();
+});
+document.querySelectorAll('.proj-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.proj-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderCards();
+  });
+});
+renderCards();
+
+/* ══════════════════════════════════════
+   VERTICAL EXPERIENCE — INTERSECTION OBSERVER
+══════════════════════════════════════ */
+const expvObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el    = entry.target;
+    const delay = parseInt(el.dataset.expvDelay || 0);
+    setTimeout(() => el.classList.add('expv-visible'), delay);
+    expvObserver.unobserve(el);
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.expv-label, .expv-heading, .expv-row')
+        .forEach(el => expvObserver.observe(el));
+
+/* ══════════════════════════════════════
+   ALL GSAP ANIMATIONS — inside window.load
+   so ScrollTrigger measures are correct
+══════════════════════════════════════ */
+window.addEventListener('load', () => {
+
+  /* save scroll, jump to top so pin spacer is measured from 0 */
+  const savedScroll = window.scrollY;
+  window.scrollTo(0, 0);
+
+  /* ── Hero entrance ── */
+  gsap.set(['#hero-label','#hero-name','#hero-skill-wrap'], { opacity:0, y:30 });
+  gsap.set('#hero-img-block', { opacity:0, x:40 });
+  gsap.timeline({ delay:0.2 })
+    .to('#hero-label',      { opacity:1, y:0, duration:0.9, ease:'power3.out' })
+    .to('#hero-name',       { opacity:1, y:0, duration:1,   ease:'power3.out' }, '-=0.5')
+    .to('#hero-skill-wrap', { opacity:1, y:0, duration:0.8, ease:'power3.out' }, '-=0.4')
+    .to('#hero-img-block',  { opacity:1, x:0, duration:1,   ease:'power3.out' }, '-=0.6');
+
+  /* ── Horizontal scroll (Expertise) ── */
+  const track        = document.getElementById('expTrack');
+  const progressFill = document.getElementById('expProgressFill');
+  document.querySelector('.exp-sticky-wrap').style.overflow = 'visible';
+
+  const tween = gsap.to(track, {
+    x: () => -(track.scrollWidth - document.querySelector('.exp-track-outer').clientWidth),
+    ease: 'none',
+    paused: true,
+  });
+
+  ScrollTrigger.create({
+    trigger: '#experience',
+    pin: '#expStickyWrap',
+    start: 'top top',
+    end: () => `+=${track.scrollWidth - window.innerWidth + 128}`,
+    scrub: 1,
+    anticipatePin: 1,
+    invalidateOnRefresh: true,
+    animation: tween,
+    onUpdate: self => { progressFill.style.width = (self.progress * 100) + '%'; }
+  });
+
+  /* ── Big text parallax ── */
+  const bigCfg = { trigger:'.big-text-section', start:'top bottom', end:'bottom top', scrub:true };
+  gsap.to('#bigText1', { x:'-20%', ease:'none', scrollTrigger: bigCfg });
+  gsap.to('#bigText2', { x:'20%',  ease:'none', scrollTrigger: bigCfg });
+
+  /* ── Sticky quote ── */
+  const stickyWords = document.querySelectorAll('.sticky-word');
+  ScrollTrigger.create({
+    trigger: '.sticky-scene',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    onUpdate: self => {
+      const total = stickyWords.length;
+      stickyWords.forEach((w, i) => {
+        w.classList.toggle('lit', self.progress >= i / total - 0.02);
+      });
+    }
+  });
+
+  /* ── Education timeline ── */
+  document.querySelectorAll('.edu-item').forEach((item, i) => {
+    gsap.to(item, {
+      opacity:1, y:0, duration:0.9, ease:'expo.out', delay: i * 0.08,
+      scrollTrigger: { trigger:item, start:'top 82%', toggleActions:'play none none none' }
+    });
+  });
+
+  /* refresh then restore scroll */
+  ScrollTrigger.refresh();
+  requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, savedScroll)));
+  // Re-enable smooth scroll after GSAP is set up
+  setTimeout(() => {
+    document.documentElement.style.scrollBehavior = 'smooth';
+  }, 100);
+});
+</script>
+ 
+<!-- ─── SCRIPTS ─── -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
@@ -2422,13 +2849,58 @@ function initExperience() {
 
 
 
-function initAll() {
-  initExperience();
-  ScrollTrigger.refresh();
+// function initAll() {
+//   initExperience();
+//   ScrollTrigger.refresh();
+// }
+
+// initAll();
+function initExperience() {
+  const track        = document.getElementById('expTrack');
+  const progressFill = document.getElementById('expProgressFill');
+
+  // Remove overflow:hidden — let GSAP control it
+  document.querySelector('.exp-sticky-wrap').style.overflow = 'visible';
+
+  const tween = gsap.to(track, {
+    x: () => -(track.scrollWidth - document.querySelector('.exp-track-outer').clientWidth),
+    ease: 'none',
+    paused: true,
+  });
+
+  ScrollTrigger.create({
+    trigger: '#experience',        // ← trigger on the SECTION, not the inner wrap
+    pin: '#expStickyWrap',         // ← pin the inner wrap separately
+    start: 'top top',
+    end: () => `+=${track.scrollWidth - window.innerWidth + 128}`,
+    scrub: 1,
+    anticipatePin: 1,              // ← prevents the jump/white gap on reload
+    invalidateOnRefresh: true,
+    animation: tween,
+    onUpdate: self => {
+      progressFill.style.width = (self.progress * 100) + '%';
+    }
+  });
 }
 
-initAll();
+// Wait for full page load before initialising
+window.addEventListener('load', () => {
+  // Force scroll to top so ScrollTrigger measures correctly
+  // then restore position after refresh
+  const savedScroll = window.scrollY;
+  window.scrollTo(0, 0);
 
+  initExperience();
+
+  ScrollTrigger.refresh();
+
+  // Restore scroll position after a short delay
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, savedScroll);
+    });
+  });
+});
 
 
   /* ── BIG TEXT PARALLAX ── */
@@ -2661,7 +3133,7 @@ document.querySelectorAll('.edu-item').forEach((item, i) => {
 
 
 
-</script>
+</script> -->
 
 </body>
 </html>
