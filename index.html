@@ -791,6 +791,38 @@ body {
   white-space: nowrap;
   z-index: 0;
 }
+/* ─── EXPERIENCE SECTION — RESPONSIVE DOWN TO 350px ─── */
+@media (max-width: 600px) {
+  .exp-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+     padding: 2.5rem 1.25rem 1.5rem; 
+  }
+ /* .exp-section-title {
+    font-size: clamp(1.7rem, 8vw, 2.8rem);
+  }*/
+  .exp-progress-wrap {
+    width: 100%;
+  }
+   .exp-progress-bar {
+    width: 100px;
+  } 
+   .exp-track-outer {
+    padding: 0 1.25rem;
+  }
+   .exp-hint {
+    right: 1.25rem;
+    bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 380px) {
+ 
+  /* .exp-card {
+    padding: 2.25rem 1.5rem;
+  } */
+}
 
 
 
@@ -2124,6 +2156,7 @@ a.ft-info-val:hover { color: var(--gold); }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /* ══════════════════════════════════════
    HEADER
