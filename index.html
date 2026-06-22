@@ -223,8 +223,8 @@ body {
 .hd-drawer {
   position: fixed;
   top: 68px; left: 0; right: 0;
-  background: var(--hd-bg);
-  border-bottom: 1px solid var(--hd-border);
+  background: var(--ink);
+  border-bottom: 1px solid var(--gold);
   z-index: 8999;
   overflow: hidden;
  
@@ -329,7 +329,14 @@ body {
   z-index: 99999;
   transform: translate(-50%, -50%);
 }
-
+@media (max-width: 768px) {
+#cursor-ring {
+display: none;
+}
+#cursor-dot {
+display: none;
+}
+}
 /* ─── LIGHTNING CANVAS ─── */
 #lightning-canvas {
   position: fixed;
@@ -457,7 +464,7 @@ body {
 /* ─── RIGHT IMAGE ─── */
 .hero-image-wrap {
   position: relative;
-  width: 350px;
+  width: 300px;
   flex-shrink: 0;
 }
 .hero-image-wrap img {
@@ -534,7 +541,7 @@ body {
   }
   .hero-label { justify-content: center; }
   .hero-skill-wrap { justify-content: center; flex-wrap: wrap; flex-direction: column; }
-  .hero-image-wrap { width: 350px; }
+  .hero-image-wrap { width: 300px; }
   .hero-scroll-hint { display: none; }
 }
 
@@ -1665,7 +1672,7 @@ a.ft-info-val:hover { color: var(--gold); }
     </nav>
  
     <!-- Desktop CTA -->
-    <a href="https://wa.me/923001234567" target="_blank" rel="noopener" class="hd-cta">
+    <a href="https://wa.me/923219424370" target="_blank" rel="noopener" class="hd-cta">
       Hire me
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M2 6.5h9M7 2.5l4 4-4 4"/>
@@ -1690,7 +1697,7 @@ a.ft-info-val:hover { color: var(--gold); }
       <a href="#projects"       class="hd-nav-link">Projects</a>
       <a href="#education"  class="hd-nav-link">Education</a>
       <a href="#footer"    class="hd-nav-link">Contact</a>
-    <a href="https://wa.me/923001234567" target="_blank" rel="noopener" class="hd-drawer-cta">
+    <a href="https://wa.me/923219424370" target="_blank" rel="noopener" class="hd-drawer-cta">
       Hire me on WhatsApp →
     </a>
   </div>
@@ -1719,7 +1726,7 @@ a.ft-info-val:hover { color: var(--gold); }
     </div>
 
     <div class="hero-image-wrap" id="hero-img-block">
-      <img src="assets/saad1.webp" alt="Saad Shams" style="width: 350px; height: auto;">
+      <img src="assets/saad1.webp" alt="Saad Shams" style="width: 300px; height: auto;">
       <div class="hero-image-frame"></div>
     </div>
 
@@ -1794,7 +1801,7 @@ a.ft-info-val:hover { color: var(--gold); }
         <div class="exp-card" style="background: var(--ink); border-color: rgba(200,184,154,0.1); display:flex; flex-direction:column; justify-content:center; align-items:flex-start; min-height: 260px;">
           <div style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--warm); opacity:0.5; margin-bottom:1.5rem;">What's next</div>
           <div style="font-family:var(--serif); font-size:2.2rem; font-weight:300; font-style:italic; color:var(--paper); line-height:1.2; margin-bottom:2rem;">Your project,<br>perhaps?</div>
-          <a href="https://wa.me/923104725492" target="_blank" rel="noopener" style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent); padding-bottom:0.2rem;">Get in touch →</a>
+          <a href="https://wa.me/923219424370" target="_blank" rel="noopener" style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent); padding-bottom:0.2rem;">Get in touch →</a>
         </div>
 
       </div><!-- end exp-track -->
@@ -1949,7 +1956,8 @@ a.ft-info-val:hover { color: var(--gold); }
 <div class="proj-modal-bg" id="projModalBg">
   <div class="proj-modal" id="projModal">
     <div class="proj-modal-thumb" id="modalThumb">
-      <button class="proj-modal-close" id="modalClose"><i class="ti ti-x"></i></button>
+      <!-- <button class="proj-modal-close" id="modalClose"><i class="ti ti-x"></i></button> -->
+       <button class="proj-modal-close" id="modalClose"><img src="assets/close (1).png" alt="close" style="width: 15px; height: auto;"></button>
     </div>
     <div class="proj-modal-body">
       <div class="proj-modal-num" id="modalNum"></div>
@@ -2118,7 +2126,7 @@ a.ft-info-val:hover { color: var(--gold); }
  
     <div class="ft-info-cell">
       <div class="ft-info-label">WhatsApp</div>
-      <a href="https://wa.me/923104725492" target="_blank" rel="noopener" class="ft-info-val">+92 310-4725492</a>
+      <a href="https://wa.me/923219424370" target="_blank" rel="noopener" class="ft-info-val">+92 321-9424370</a>
     </div>
  
     <div class="ft-info-cell">
@@ -2447,7 +2455,7 @@ function renderCards() {
 
 function openModal(p) {
   const modalThumb = document.getElementById('modalThumb');
-  modalThumb.style.cssText = `background:${p.thumb};background-size:cover;background-position:center;height:220px;position:relative;`;
+  modalThumb.style.cssText = `background:${p.thumb};background-size:contain;background-position:center;height:220px;position:relative;background-repeat:no-repeat;`;
   document.getElementById('modalNum').textContent    = p.id + ' / 0' + projects.length;
   document.getElementById('modalName').innerHTML     = p.name + '<em>' + p.nameEm + '</em>';
   document.getElementById('modalClient').textContent = p.client;
@@ -2566,7 +2574,7 @@ window.addEventListener('load', () => {
   }, 100);
 });
 </script>
-
+ 
 
 </body>
 </html>
