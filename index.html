@@ -40,7 +40,9 @@ body {
   color: var(--ink);
   font-family: var(--sans);
   font-weight: 400;
-  overflow-x: hidden;
+  /* clip, NOT hidden — `hidden` makes body a scroll container and breaks
+     position:sticky (the card stack, the education title). Same clipping. */
+  overflow-x: clip;
   cursor: none;
 }
 
@@ -875,156 +877,197 @@ display: none;
 
 
 /* ══════════════════════════════════
-   PREFIX: expv — avoids ALL conflicts
-   with existing .exp-* classes in
-   the horizontal-scroll section
-══════════════════════════════════ exp section */
- 
+   PREFIX: expv — STACKING CARDS
+   Avoids ALL conflicts with the .exp-*
+   classes in the horizontal-scroll section
+══════════════════════════════════ */
+
 #expv-section {
+  --expv-pad: 4rem;          /* section side padding, reused by the sticky head */
+  --expv-navh: 68px;         /* fixed header height */
   background: var(--stone);
-  padding: 8rem 4rem;
+  padding: 8rem var(--expv-pad) 4rem;
+  position: relative;
+  /* NOTE: never add overflow:hidden here — it kills the sticky stack */
 }
- 
-/* ── heading ── */
+
+/* ── centred heading — pins first, cards stack beneath it ── */
+.expv-head {
+  position: sticky;
+  top: var(--expv-navh);
+  z-index: 20;               /* above every card (cards are z-index 1…6) */
+
+  /* full-bleed background so cards slide out of sight behind it,
+     shadows included — hence the negative side margins */
+  margin: 0 calc(var(--expv-pad) * -1);
+  padding: 1.25rem var(--expv-pad) 1.75rem;
+  background: var(--stone);
+  text-align: center;
+  will-change: transform;   /* JS slides it up with the pile at the end */
+}
+
+/* Both start VISIBLE. The JS arms them (adds .expv-armed) a moment before
+   observing, so if the script ever fails the heading still shows. */
 .expv-label {
   font-family: var(--mono);
   font-size: 0.65rem;
   letter-spacing: 0.2em;
-  color: var(--muted);
   text-transform: uppercase;
+  color: var(--muted);
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  opacity: 0;
-  transform: translateY(20px);
+  justify-content: center;
+  gap: 1rem;
   transition: opacity 0.7s ease, transform 0.7s ease;
 }
-.expv-label.expv-visible { opacity: 1; transform: translateY(0); }
+.expv-label::before,
 .expv-label::after {
   content: '';
-  flex: 1;
-  max-width: 60px;
+  width: 60px;
   height: 1px;
   background: var(--mid);
 }
- 
+
 .expv-heading {
   font-family: var(--serif);
+  /* 400 explicitly — it's an <h2>, and the UA bold would fake-embolden
+     DM Serif Display, which only ships one weight */
+  font-weight: 400;
   font-size: clamp(2.5rem, 6vw, 6rem);
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--ink);
-  margin-bottom: 4rem;
-  opacity: 0;
-  transform: translateY(20px);
+  margin: 0;
   transition: opacity 0.8s ease 0.12s, transform 0.8s ease 0.12s;
 }
 .expv-heading em { font-style: italic; color: var(--gold); }
-.expv-heading.expv-visible { opacity: 1; transform: translateY(0); }
- 
-/* ── list ── */
-.expv-list {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--mid);
+
+/* armed = hidden, waiting to reveal */
+.expv-label.expv-armed,
+.expv-heading.expv-armed {
+  opacity: 0;
+  transform: translateY(20px);
 }
- 
-/* ── row ──
-   --expv-rx  : reveal offset (left → 0)
-   --expv-hy  : hover lift (0 → -4px)
-   Kept separate so they never cancel each other
+.expv-label.expv-visible,
+.expv-heading.expv-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── the stack ──
+   --expv-top    : where card 1 pins (clears the 68px fixed header)
+   --expv-step   : how much lower each card pins — the visible peek
+   --expv-travel : scroll distance between card arrivals
 */
-.expv-row {
+.expv-stack {
+  /* card 1 pins just under the fixed header AND the sticky heading.
+     --expv-headh is measured in JS; the fallback covers first paint. */
+  --expv-top: calc(var(--expv-navh) + var(--expv-headh, 200px) + 1.25rem);
+  --expv-step: 20px;
+  --expv-travel: clamp(280px, 46vh, 520px);
+
+  max-width: 1080px;
+  margin: 2.5rem auto 0;
+  padding-bottom: 28vh;   /* lets the last card stay pinned a beat */
+  position: relative;
+}
+
+.expv-card {
+  position: sticky;
+  top: calc(var(--expv-top) + var(--expv-i, 0) * var(--expv-step));
+
   display: grid;
   grid-template-columns: 200px 1fr;
   gap: 3rem;
-  padding: 3.5rem;
-  border-bottom: 1px solid var(--mid);
-  position: relative;
-  overflow: hidden;
-  cursor: default;
- 
-  --expv-rx: -40px;
+  padding: 3.25rem;
+  min-height: 340px;
+  border-radius: 2px;
+  overflow: hidden;          /* safe — clips the dim veil, not the sticky */
+
+  /* JS writes these; the defaults keep it sane with JS off */
+  --expv-scale: 1;
+  --expv-rot: 0deg;
+  --expv-dim: 0;
   --expv-hy: 0px;
-  transform: translateX(var(--expv-rx)) translateY(var(--expv-hy));
-  background-color: transparent;
-  opacity: 0;
- 
-  transition:
-    transform        0.65s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow       0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color     0.45s ease,
-    opacity          0.7s  ease;
+
+  transform: translateY(var(--expv-hy))
+             scale(var(--expv-scale))
+             rotate(var(--expv-rot));
+  transform-origin: 50% 0%;  /* shrink upward so the pile stays aligned */
+  will-change: transform;
+  transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              transform  0.12s linear;
 }
- 
-/* scroll-in: clear x only */
-.expv-row.expv-visible {
-  --expv-rx: 0px;
-  opacity: 1;
-}
- 
-/* hover: lift + gold bg */
-.expv-row:hover {
-  --expv-hy: -4px;
-  background-color: var(--gold);
-  box-shadow: 0 24px 64px rgba(56, 41, 25, 0.548);
- 
-  border-bottom-color: transparent;
-}
- 
-/* left accent line */
-.expv-row::before {
+
+.expv-card + .expv-card { margin-top: var(--expv-travel); }
+
+/* dim veil — above this card's content, below the next card */
+.expv-card::after {
   content: '';
   position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(26, 24, 20, var(--expv-dim));
+  transition: background 0.12s linear;
+}
+
+/* ── alternating colourways ── */
+.expv-card:nth-child(odd) {
+  background: var(--paper);
+  box-shadow: 0 28px 70px -18px rgba(56, 41, 25, 0.28),
+              0 2px 6px rgba(56, 41, 25, 0.06);
+}
+.expv-card:nth-child(even) {
   background: var(--gold);
-  transform: scaleY(0);
-  transform-origin: bottom;
-  transition: transform      0.55s cubic-bezier(0.22, 1, 0.36, 1),
-              background     0.4s  ease;
+  box-shadow: 0 28px 70px -18px rgba(56, 41, 25, 0.45),
+              0 2px 6px rgba(56, 41, 25, 0.12);
 }
-.expv-row:hover::before {
-  transform: scaleY(1);
-  background: rgba(250,248,244,0.5);
+
+/* stacking order — JS sets this too; this is the no-JS fallback */
+.expv-card:nth-child(1) { z-index: 1; }
+.expv-card:nth-child(2) { z-index: 2; }
+.expv-card:nth-child(3) { z-index: 3; }
+.expv-card:nth-child(4) { z-index: 4; }
+.expv-card:nth-child(5) { z-index: 5; }
+.expv-card:nth-child(6) { z-index: 6; }
+
+/* ── hover: small lift, deeper shadow ── */
+.expv-card:hover { --expv-hy: -6px; }
+
+.expv-card:nth-child(odd):hover {
+  box-shadow: 0 40px 90px -20px rgba(56, 41, 25, 0.36),
+              0 2px 6px rgba(56, 41, 25, 0.08);
 }
- 
-/* ── child text transitions ── */
-.expv-period,
-.expv-company,
-.expv-role,
-.expv-desc,
-.expv-tag {
-  transition:
-    color        0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+.expv-card:nth-child(even):hover {
+  box-shadow: 0 40px 90px -20px rgba(56, 41, 25, 0.55),
+              0 2px 6px rgba(56, 41, 25, 0.16);
 }
- 
-.expv-row:hover .expv-period  { color: rgba(250,248,244,0.65); }
-.expv-row:hover .expv-company { color: var(--paper); }
-.expv-row:hover .expv-role    { color: var(--paper); }
-.expv-row:hover .expv-desc    { color: rgba(250,248,244,0.72); }
-.expv-row:hover .expv-tag     { color: rgba(250,248,244,0.65); border-color: rgba(250,248,244,0.28); }
- 
-/* ── meta column ── */
-/* .expv-meta { }
-  */
+
+/* ── card content ── */
+.expv-meta,
+.expv-body { position: relative; z-index: 1; }
+
 .expv-period {
   font-family: var(--mono);
   font-size: 0.7rem;
   letter-spacing: 0.1em;
   color: var(--muted);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 .expv-company {
   font-family: var(--serif);
+  font-weight: 400;
   font-size: 1.4rem;
   color: var(--ink);
 }
- 
-/* ── content column ── */
+.expv-index {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-top: 1.25rem;
+}
 .expv-role {
   font-family: var(--sans);
   font-weight: 600;
@@ -1042,7 +1085,7 @@ display: none;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
 }
 .expv-tag {
   font-family: var(--mono);
@@ -1054,15 +1097,62 @@ display: none;
   color: var(--muted);
   border-radius: 2px;
 }
- 
-/* ── responsive ── */
+
+/* gold cards need light text */
+.expv-card:nth-child(even) .expv-period  { color: rgba(250,248,244,0.7); }
+.expv-card:nth-child(even) .expv-company,
+.expv-card:nth-child(even) .expv-role    { color: var(--paper); }
+.expv-card:nth-child(even) .expv-desc    { color: rgba(250,248,244,0.78); }
+.expv-card:nth-child(even) .expv-index   { color: rgba(250,248,244,0.55); }
+.expv-card:nth-child(even) .expv-tag {
+  color: rgba(250,248,244,0.7);
+  border-color: rgba(250,248,244,0.3);
+}
+
+/* ── responsive — stacking kept on mobile, tighter numbers ── */
 @media (max-width: 768px) {
-  #expv-section { padding: 5rem 1.5rem; }
-  .expv-row {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    padding: 2rem 1.5rem;
+  #expv-section {
+    --expv-pad: 1.25rem;
+    padding: 5rem var(--expv-pad) 2rem;
   }
+  .expv-head { padding: 1rem var(--expv-pad) 1.25rem; }
+  .expv-label::before,
+  .expv-label::after { width: 32px; }
+
+  .expv-stack {
+    --expv-top: calc(var(--expv-navh) + var(--expv-headh, 150px) + 0.75rem);
+    --expv-step: 12px;
+    --expv-travel: clamp(200px, 34vh, 340px);
+    margin-top: 1.5rem;
+    padding-bottom: 22vh;
+  }
+
+  .expv-card {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 1.75rem 1.5rem;
+    min-height: 0;
+  }
+  .expv-index { display: none; }
+}
+
+/* ── reduced motion — flat list, no pinning ── */
+@media (prefers-reduced-motion: reduce) {
+  .expv-head {
+    position: static;
+    margin: 0 0 3rem;
+    padding: 0;
+  }
+  .expv-card {
+    position: static;
+    transform: none !important;
+    transition: none;
+  }
+  .expv-card + .expv-card { margin-top: 1.5rem; }
+  .expv-card::after { display: none; }
+  .expv-stack { padding-bottom: 0; margin-top: 0; }
+  .expv-label,
+  .expv-heading { opacity: 1; transform: none; transition: none; }
 }
 
 
@@ -1190,7 +1280,8 @@ display: none;
   padding: 10rem 4rem;
   background: var(--warm);
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden; */
+  overflow: clip;
 }
 
 .edu-bg-text {
@@ -1216,7 +1307,7 @@ display: none;
   z-index: 2;
 }
 
-.edu-left { position: relative; }
+.edu-left { position: relative; align-self: stretch; }
 
 .edu-section-title {
   font-family: var(--serif);
@@ -1823,37 +1914,40 @@ a.ft-info-val:hover { color: var(--gold); }
 
 
 
-<!-- ════════ EXPERIENCE — VERTICAL ROWS ════════ -->
+<!-- ════════ EXPERIENCE — STACKING CARDS ════════ -->
 <section id="expv-section">
- 
-  <div class="expv-label">03 — Experience</div>
-  <div class="expv-heading">Where I've<br><em>shipped work.</em></div>
- 
-  <div class="expv-list">
- 
-    <div class="expv-row" data-expv-delay="0">
+
+  <div class="expv-head">
+    <div class="expv-label">03 — Experience</div>
+    <h2 class="expv-heading">Where I've<br><em>shipped work.</em></h2>
+  </div>
+
+  <div class="expv-stack">
+
+    <article class="expv-card">
       <div class="expv-meta">
         <div class="expv-period">2025 — Present</div>
         <div class="expv-company">TriVA</div>
+        <div class="expv-index">01 / 04</div>
       </div>
       <div class="expv-body">
         <div class="expv-role">Shopify Developer</div>
         <p class="expv-desc">Built and maintained production Shopify stores — custom Liquid sections, bundle product systems using metafields, shipping zone configuration, popup flows, cart UX improvements, and SEO optimizations across multiple client storefronts.</p>
         <div class="expv-tags">
           <span class="expv-tag">Liquid</span>
-          <!-- <span class="expv-tag">Shopify CLI</span> -->
           <span class="expv-tag">JS</span>
           <span class="expv-tag">Metafields</span>
           <span class="expv-tag">Cart API</span>
           <span class="expv-tag">Theme Dev</span>
         </div>
       </div>
-    </div>
- 
-    <div class="expv-row" data-expv-delay="100">
+    </article>
+
+    <article class="expv-card">
       <div class="expv-meta">
         <div class="expv-period">2024 — 2025</div>
         <div class="expv-company">Devion</div>
+        <div class="expv-index">02 / 04</div>
       </div>
       <div class="expv-body">
         <div class="expv-role">Shopify Developer</div>
@@ -1866,12 +1960,13 @@ a.ft-info-val:hover { color: var(--gold); }
           <span class="expv-tag">UK Clients</span>
         </div>
       </div>
-    </div>
- 
-    <div class="expv-row" data-expv-delay="200">
+    </article>
+
+    <article class="expv-card">
       <div class="expv-meta">
         <div class="expv-period">2023</div>
         <div class="expv-company">Codiveo</div>
+        <div class="expv-index">03 / 04</div>
       </div>
       <div class="expv-body">
         <div class="expv-role">React Developer — Intern</div>
@@ -1883,27 +1978,27 @@ a.ft-info-val:hover { color: var(--gold); }
           <span class="expv-tag">CSS</span>
         </div>
       </div>
-    </div>
+    </article>
 
-
-    <div class="expv-row" data-expv-delay="200">
+    <article class="expv-card">
       <div class="expv-meta">
         <div class="expv-period">2022</div>
         <div class="expv-company">Freelancing</div>
+        <div class="expv-index">04 / 04</div>
       </div>
       <div class="expv-body">
-        <div class="expv-role">Wordpress & Video Editing </div>
-        <p class="expv-desc">Worked as a freelancer delivering WordPress website customizations and video editing projects for clients. Built and styled WordPress pages, handled content updates, and produced edited video content using Premiere Pro and Filmora for social media and digital use</p>
+        <div class="expv-role">WordPress &amp; Video Editing</div>
+        <p class="expv-desc">Worked as a freelancer delivering WordPress website customizations and video editing projects for clients. Built and styled WordPress pages, handled content updates, and produced edited video content using Premiere Pro and Filmora for social media and digital use.</p>
         <div class="expv-tags">
           <span class="expv-tag">WordPress</span>
-          <span class="expv-tag"> Video Editing</span>
+          <span class="expv-tag">Video Editing</span>
           <span class="expv-tag">Premiere Pro</span>
           <span class="expv-tag">Filmora</span>
           <span class="expv-tag">Freelance</span>
         </div>
       </div>
-    </div>
- 
+    </article>
+
   </div>
 </section>
 
@@ -2481,19 +2576,160 @@ document.querySelectorAll('.proj-filter').forEach(btn => {
 renderCards();
 
 /* ══════════════════════════════════════
-   VERTICAL EXPERIENCE — INTERSECTION OBSERVER
+   EXPERIENCE STACK — heading reveal
 ══════════════════════════════════════ */
-const expvObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (!entry.isIntersecting) return;
-    const el    = entry.target;
-    const delay = parseInt(el.dataset.expvDelay || 0);
-    setTimeout(() => el.classList.add('expv-visible'), delay);
-    expvObserver.unobserve(el);
+(function () {
+  const els = document.querySelectorAll('.expv-label, .expv-heading');
+  if (!els.length) return;
+
+  // No observer support, or reduced motion? Leave them plainly visible.
+  if (!('IntersectionObserver' in window) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.remove('expv-armed');
+      entry.target.classList.add('expv-visible');
+      obs.unobserve(entry.target);
+    });
+  }, { threshold: 0.1 });
+
+  els.forEach(el => {
+    // If it's already on screen at load, don't hide it — just show it
+    const r = el.getBoundingClientRect();
+    if (r.top < window.innerHeight && r.bottom > 0) {
+      el.classList.add('expv-visible');
+      return;
+    }
+    el.classList.add('expv-armed');
+    obs.observe(el);
   });
-}, { threshold: 0.1 });
-document.querySelectorAll('.expv-label, .expv-heading, .expv-row')
-        .forEach(el => expvObserver.observe(el));
+
+  // Safety net: anything still armed after 4s gets revealed regardless
+  setTimeout(() => {
+    document.querySelectorAll('.expv-armed').forEach(el => {
+      el.classList.remove('expv-armed');
+      el.classList.add('expv-visible');
+    });
+  }, 4000);
+})();
+
+/* ══════════════════════════════════════
+   EXPERIENCE STACK — measure the sticky heading
+   Cards pin below it, so its height feeds --expv-top.
+══════════════════════════════════════ */
+(function () {
+  const section = document.getElementById('expv-section');
+  const head = section && section.querySelector('.expv-head');
+  if (!head) return;
+
+  function measure() {
+    section.style.setProperty('--expv-headh', head.offsetHeight + 'px');
+  }
+
+  measure();
+  window.addEventListener('load', measure);
+  window.addEventListener('resize', measure);
+
+  // Fonts landing late change the heading's height — re-measure when they do
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  if ('ResizeObserver' in window) new ResizeObserver(measure).observe(head);
+})();
+
+/* ══════════════════════════════════════
+   EXPERIENCE STACK — depth (scale / dim / tilt)
+   CSS sticky does the pinning; this only writes
+   three custom properties per card.
+══════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  const stack = document.querySelector('.expv-stack');
+  if (!stack) return;
+
+  const cards = Array.prototype.slice.call(stack.querySelectorAll('.expv-card'));
+  if (!cards.length) return;
+
+  const head = document.querySelector('#expv-section .expv-head');
+
+  // --expv-i drives the sticky top offset; z-index keeps later cards on top
+  cards.forEach((card, i) => {
+    card.style.setProperty('--expv-i', i);
+    card.style.zIndex = String(i + 1);
+    card.dataset.expvDir = i % 2 ? '1' : '-1';   // alternating tilt direction
+  });
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const MAX_ROT    = 2.2;    // deg, once a card is fully covered
+  const SCALE_STEP = 0.035;  // shrink per card layered on top
+  const MIN_SCALE  = 0.86;
+  const DIM_STEP   = 0.16;   // veil opacity per card on top
+  const MAX_DIM    = 0.5;
+
+  let queued = false;
+
+  function update() {
+    queued = false;
+    const vh = window.innerHeight;
+
+    // arrival: 0 entering from the bottom, 1 once pinned
+    const arrival = cards.map(card => {
+      const target = parseFloat(window.getComputedStyle(card).top) || 0;
+      const top    = card.getBoundingClientRect().top;
+      const v      = (vh - top) / Math.max(1, vh - target);
+      return v < 0 ? 0 : v > 1 ? 1 : v;
+    });
+
+    for (let i = 0; i < cards.length; i++) {
+      // how many cards sit on top of this one, fractionally
+      let depth = 0;
+      for (let j = i + 1; j < cards.length; j++) depth += arrival[j];
+
+      const scale = Math.max(MIN_SCALE, 1 - depth * SCALE_STEP);
+      const dim   = Math.min(MAX_DIM, depth * DIM_STEP);
+      const rot   = Number(cards[i].dataset.expvDir) * Math.min(1, depth) * MAX_ROT;
+
+      const s = cards[i].style;
+      s.setProperty('--expv-scale', scale.toFixed(4));
+      s.setProperty('--expv-dim', dim.toFixed(3));
+      s.setProperty('--expv-rot', rot.toFixed(2) + 'deg');
+    }
+
+    /* ── end of the section: let the heading leave with the pile ──
+       The cards unpin at the bottom of .expv-stack, but the heading is
+       sticky within the whole section, so it would hang around after
+       they've gone. Measure how far the pile has slipped past its pinned
+       position and translate the heading by the same amount — it rides up
+       with the cards, staying above them the whole way out. */
+    if (head) {
+      const last     = cards[cards.length - 1];
+      const pinnedAt = parseFloat(window.getComputedStyle(last).top) || 0;
+      const slip     = pinnedAt - last.getBoundingClientRect().top;
+      head.style.transform = slip > 0.5 ? 'translateY(' + (-slip).toFixed(1) + 'px)' : '';
+    }
+  }
+
+  function onScroll() {
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(update);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('load', onScroll);
+
+  // GSAP pins #experience above this section, which shifts document height.
+  // Re-read after every ScrollTrigger refresh so the maths stays honest.
+  if (window.ScrollTrigger) {
+    ScrollTrigger.addEventListener('refresh', onScroll);
+  }
+
+  update();
+})();
 
 /* ══════════════════════════════════════
    ALL GSAP ANIMATIONS — inside window.load
