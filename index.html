@@ -2978,8 +2978,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const s = currentShots[i];
     resetZoom();
     img.src = s.src;
-    tag.textContent = s.label || '';
-    tag.style.display = s.label ? '' : 'none';
+    // tag.textContent = s.label || '';
+    // tag.style.display = s.label ? '' : 'none';
     cap.textContent = s.caption || '';
     cnt.textContent = (i + 1) + ' / ' + currentShots.length;
     prev.style.display = next.style.display = currentShots.length > 1 ? '' : 'none';
