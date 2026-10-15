@@ -66,11 +66,11 @@ body {
  
 /* scrolled state */
 .hd-header.hd-scrolled {
-  background: var(--ink-opa);
-  /* border-bottom-color: var(--hd-border); */
+  /* background: var(--ink-opa); */
+   border-bottom-color: var(--hd-border); 
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 4px 40px rgba(0,0,0,0.35);
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0,35);
 }
  
 /* ── inner ── */
@@ -1195,7 +1195,51 @@ display: none;
   .proj-card-footer { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-top: 1px solid #e8e3d9; }
   .proj-card-link { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #b8955a; text-decoration: none; display: flex; align-items: center; gap: 6px; }
   .proj-card-type { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: #d4cfc6; }
+/* ===== PROJECT SCREENSHOTS ===== */
+.pj-shots { margin:10px 0 40px 0; padding-top:22px; border-top:1px solid rgba(255,255,255,.12); }
+.pj-shots-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+@media (max-width:600px){ .pj-shots-grid { grid-template-columns:1fr; } }
 
+.pj-shot { position:relative; margin:0; cursor:zoom-in; border-radius:10px; overflow:hidden;
+           background:#0f0f18; border:1px solid rgba(255,255,255,.1); }
+.pj-shot img { width:100%; display:block; transition:transform .4s ease; }
+.pj-shot:hover img { transform:scale(1.04); }
+.pj-shot figcaption { font-size:.7rem; padding:8px 10px; opacity:.7; }
+.pj-label { position:absolute; top:10px; left:10px; z-index:2; font-family:monospace; font-size:.6rem;
+            letter-spacing:2px; text-transform:uppercase; padding:4px 10px; border-radius:100px;
+            color:#b8955a; background:#e8e3d9; backdrop-filter:blur(6px);
+            border:1px solid #e8e3d9; }
+
+/* ===== LIGHTBOX ===== */
+
+#pj-lb { position:fixed; inset:0; z-index:2147483647; background:rgba(3,3,8,.94); backdrop-filter:blur(8px);
+         display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
+#pj-lb.open { opacity:1; pointer-events:all; }
+#pj-lb figure { margin:0; text-align:center; max-width:92vw; }
+#pj-lb img { max-width:92vw; max-height:78vh; border-radius:12px; box-shadow:0 20px 80px rgba(0,0,0,.7); }
+#pj-lb .lb-tag { display:inline-block; margin-top:14px; font:.65rem monospace; letter-spacing:2px;
+                 text-transform:uppercase; color:#ff00aa; }
+#pj-lb figcaption { margin-top:6px; font-size:.75rem; letter-spacing:1px; color:rgba(255,255,255,.65); }
+#pj-lb button { position:absolute; width:44px; height:44px; border-radius:50%; border:1px solid rgba(255,255,255,.2);
+                background:rgba(255,255,255,.08); color:#fff; font-size:1.3rem; cursor:pointer; }
+#pj-lb button:hover { background:rgba(0,245,255,.2); border-color:rgba(0,245,255,.5); }
+#pj-lb .x { top:20px; right:20px; }
+#pj-lb .p { left:20px; top:50%; transform:translateY(-50%); }
+#pj-lb .n { right:20px; top:50%; transform:translateY(-50%); }
+#pj-lb .c { position:absolute; top:28px; left:50%; transform:translateX(-50%);
+            font:.7rem monospace; letter-spacing:2px; color:rgba(255,255,255,.5); }
+
+#pj-lb img {
+  transition: transform .12s ease-out;
+  transform-origin: center center;
+  cursor: zoom-in;
+  touch-action: none;
+  user-select: none;
+}
+#pj-lb.zoomed img   { cursor: grab; }
+#pj-lb.dragging img { cursor: grabbing; transition: none; }
+
+@media (max-width:600px){ #pj-lb button { width:38px; height:38px; } #pj-lb .p{left:8px;} #pj-lb .n{right:8px;} }
   /* ══════════ Floating stage — sits on the page background ══════════ */
   .pf-stage {
     position: relative;
@@ -1245,7 +1289,7 @@ display: none;
   .proj-modal { background: #faf8f4; border: 1px solid var(--line, #e8e3d9); border-radius: 2px; width: 100%; max-width: 580px; max-height: 85vh; overflow-y: auto; position: relative; transform: translateY(20px); transition: transform 0.3s; }
   .proj-modal-bg.open .proj-modal { transform: translateY(0); }
   .proj-modal-thumb { height: 220px; display: flex; align-items: center; justify-content: center; position: relative; }
-  .proj-modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: rgba(26,24,20,0.5); border: none; color: #f5f1ea; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; border-radius: 2px; }
+  .proj-modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background:  #b8955b; border: none; color: #b8955b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; border-radius: 2px; }
   .proj-modal-body { padding: 1.75rem; }
   .proj-modal-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.25em; color: #b8955a; margin-bottom: 0.5rem; }
   .proj-modal-name { font-family: 'DM Serif Display', Georgia, serif; font-size: 2rem; color: #1a1814; margin-bottom: 0.25rem; line-height: 1.1; }
@@ -1254,17 +1298,17 @@ display: none;
   .proj-modal-desc { font-size: 14px; line-height: 1.85; color: #9c9589; margin-bottom: 1.25rem; }
   .proj-modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.5rem; }
   .proj-modal-tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: #9c9589; border: 1px solid #d4cfc6; padding: 4px 10px; border-radius: 100px; }
-  .proj-modal-cta { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #b8955a; border: 1px solid #b8955a; padding: 10px 20px; background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s, color 0.2s; }
+  .proj-modal-cta { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #b8955a; border: 1px solid #b8955a; padding: 10px 20px; background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s, color 0.2s; margin-bottom: 15px; }
   .proj-modal-cta:hover { background: #b8955a; color: #faf8f4; }
   .proj-empty { text-align: center; padding: 3rem; color: #9c9589; font-size: 13px; }
 
   /* ══════════ Responsive ══════════ */
-  @media (max-width: 1100px) {
+  /* @media (max-width: 1100px) {
     .pf-card { width: 240px; }
-  }
+  } */
   @media (max-width: 900px) {
     .proj-section { padding: 6rem 2rem; }
-    .pf-card { width: 200px; }
+    
   }
   /* phones: cards sit in a normal list like before, no floating */
   @media (max-width: 600px) {
@@ -1823,9 +1867,7 @@ a.ft-info-val:hover { color: var(--gold); }
  
     <!-- Availability pill — hidden on mobile -->
     <div class="hd-avail">
-      <span class="hd-avail-dot"></span>
-      Available for hire
-    </div>
+    
  
     <!-- Desktop nav -->
     <nav class="hd-nav" aria-label="Main navigation">
@@ -1972,10 +2014,7 @@ a.ft-info-val:hover { color: var(--gold); }
       </div><!-- end exp-track -->
     </div><!-- end exp-track-outer -->
 
-    <!-- <div class="exp-hint">
-      <div class="exp-hint-arrow"></div>
-      Scroll to explore
-    </div> -->
+    
 
   </div><!-- end exp-sticky-wrap -->
 </section>
@@ -2112,10 +2151,10 @@ a.ft-info-val:hover { color: var(--gold); }
     <h2 class="proj-title">My <em>Projects</em></h2>
     <div class="proj-filters" id="projFilters">
       <button class="proj-filter active" data-filter="all">All</button>
-      <button class="proj-filter" data-filter="theme">Theme Dev</button>
+      <button class="proj-filter" data-filter="theme">Shopify Theme Dev & Customization</button>
       <button class="proj-filter" data-filter="custom">Custom Build</button>
-      <button class="proj-filter" data-filter="headless">Wordpress</button>
-      <button class="proj-filter" data-filter="migration">Video Edits</button>
+      <button class="proj-filter" data-filter="wordpress">Wordpress</button>
+      <button class="proj-filter" data-filter="video">Video Edits</button>
     </div>
   </div>
 
@@ -2136,9 +2175,10 @@ a.ft-info-val:hover { color: var(--gold); }
       <div class="proj-modal-num" id="modalNum"></div>
       <div class="proj-modal-name" id="modalName"></div>
       <div class="proj-modal-client" id="modalClient"></div>
-      <p class="proj-modal-desc" id="modalDesc"></p>
+       <button class="proj-modal-cta" id="modalCta">View Live Store <i class="ti ti-external-link"></i></button>
+      <div class="proj-modal-desc" id="modalDesc"></div>
       <div class="proj-modal-tags" id="modalTags"></div>
-      <button class="proj-modal-cta" id="modalCta">View Live Store <i class="ti ti-external-link"></i></button>
+     
     </div>
   </div>
 </div>
@@ -2562,38 +2602,426 @@ typeSkill();
    PROJECTS · Solar system
 ══════════════════════════════════════ */
 const projects = [
-  { id:'01', name:'Quickfoam',       nameEm:'',
-    client:'Quickfoam · UK',         category:'theme',
-    thumb:"url('/assets/quickfoam1.jpg')",
-    desc:'Full Shopify theme customization for a UK foam supplier. Built custom product configurator, campervan upholstery filter system, and optimised checkout flow for B2B and retail customers.',
-    tags:['Liquid','Theme Dev','Metafields'], url:'https://quickfoam.co.uk/' },
-  { id:'02', name:'Blond-Clo',       nameEm:'',
-    client:'Fashion Client',          category:'custom',
-    thumb:"url('/assets/blond-clo1.jpg')",
-    desc:'Bespoke Shopify theme built from scratch for a fashion brand. Includes custom insta posts, lookbook builder, and size guide metafield system.',
-    tags:['Custom Theme','Liquid','Metaobjects','Blocks'], url:'https://blondeclo.com/' },
-  { id:'03', name:'Web Development', nameEm:'',
+  { id:'01', name:'Quickfoam',       nameEm:'— E-commerce Website',
+    client:'Quick Foam Shop Ltd · UK',         category:'theme',
+    thumb:"url('/assets/qf.webp')",
+    desc:`<p><strong>About the client</strong></p>
+  <p>Quick Foam is a specialist UK foam supplier based in Tyseley, Birmingham, trading since 1971. It sells custom-cut foam, high-density upholstery foam, closed-cell foam, mattress toppers, packaging foam and made-to-measure fabric covers. Customers include homeowners, campervan and boat owners, upholsterers and trade buyers.</p>
+
+  <p><strong>The challenge</strong></p>
+  <p>Foam is sold cut to size, in dozens of shapes and thicknesses, with several foam grades and optional extras. Quotes were slow and error-prone. Customers needed to see a price instantly and be confident they were ordering the right size and material. Shopify can't price products dynamically out of the box.</p>
+
+  <p><strong>The solution</strong></p>
+  <p>I rebuilt the store's key flows on a customized Shopify theme, centred on a two-step cut-to-size foam calculator.</p>
+
+  <p><strong>Step 1: Interactive shape and dimension picker</strong></p>
+  <ul>
+    <li>A carousel and full gallery of 20+ shapes: rectangles, T and L cushions, trapezoids, wedges, polygons, boat mattresses, 2-part and 4-part cushions and more.</li>
+    <li>Dimension inputs sit directly on the shape diagram, so customers see exactly what each measurement refers to. Positions are tuned separately for desktop and mobile.</li>
+    <li>Units can be switched between inches, cm and mm.</li>
+    <li>A built-in measuring guide explains how to measure the empty cover instead of the old foam.</li>
+    <li>A pricing engine calculates cost live from area and a thickness-based rate table, with geometry-specific formulas per shape.</li>
+  </ul>
+
+  <p><strong>Step 2: Foam selection and extras</strong></p>
+  <ul>
+    <li>A foam usage finder, a type-ahead search for uses like "sofa cushions" or "caravan mattress", auto-selects the recommended foam grade.</li>
+    <li>Foam types adjust the price automatically: standard, high-density, reflex, memory foam, recon and specialist closed-cell and polyethylene sheets.</li>
+    <li>Smart rules hide incompatible options. Specialist foams hide upholstery add-ons, thickness warnings appear where needed, and oversized pieces switch to alternative wrap options.</li>
+    <li>Optional add-ons: stockinette undercover, polyfibre wrap and spray adhesive with its own quantity control.</li>
+    <li>Quantity discounts apply automatically, and product images update as options change.</li>
+  </ul>
+
+  <p><strong>Checkout integration</strong></p>
+  <p>Because Shopify can't take custom prices, the calculator uses a one-pence variant. The quantity carries the price in pence, and all the details (dimensions, foam type, additions) are saved as line-item properties so the workshop sees exactly what to cut. The customer can add to cart or go straight to checkout with "Buy It Now".</p>
+
+  <p><strong>Other work on the store</strong></p>
+  <ul>
+    <li>Campervan upholstery filter system for fabrics and foam</li>
+    <li>Optimised checkout flow for retail and B2B customers</li>
+    <li>Mobile-first responsive layouts, including bottom-sheet menus and popups</li>
+    <li>A "Not sure about the size?" help banner with a click-to-call button, plus WhatsApp support</li>
+  </ul>
+
+  <p><strong>Results</strong></p>
+  <ul>
+    <li>Instant, accurate quotes for 20+ custom shapes with no phone call needed</li>
+    <li>Less ordering error, because the customer sees measurements on the shape diagram</li>
+    <li>Complete cut instructions for the workshop on every order</li>
+    <li>Upsell opportunities through add-ons and quantity discounts</li>
+  </ul>`,
+    tags:['Shopify Liquid','Theme Dev','Metafields','JavaScript','Shopify Cart API'], url:'https://quickfoam.co.uk/' },
+
+
+
+
+
+
+    
+
+
+    { id:'02', name:'Zonky',            nameEm:'— E-commerce Website',
+    client:'DTC Brand · Manchester',  category:'theme',
+    thumb:"url('/assets/zonky1.jpg')",
+    shots:[
+    { src:'/assets/zonky(Halloween).jpg', label:'zonky(Halloween)',  },
+    
+  ],
+    desc:`  <p>Zonky is a playful, family-focused e-commerce website designed for a modular kids' play sofa brand. It combines a bright, colorful visual identity with a clean shopping experience.</p>
+
+  <p>The design uses soft pastel colors, playful illustrations, lifestyle photography, rounded UI elements, and bold typography to create a fun and welcoming experience.</p>
+
+  <p><strong>Key features:</strong></p>
+  <ul>
+    <li>Modular design, safety, easy storage, and machine-washable covers highlighted on the homepage</li>
+    <li>Product customization by color</li>
+    <li>FAQs, free activity packs and build guides</li>
+    <li>Brand storytelling sections</li>
+  </ul>
+
+  <p><strong>My focus:</strong> creating a visually engaging e-commerce experience that balances playfulness, usability, product storytelling, and conversion-focused design.</p>
+`,
+
+
+    tags:['Cart API','Shopify Flow','Liquid','JS'], url:'https://zonky.uk/' },
+
+
+
+
+
+
+
+
+
+   {
+  id: '03',
+  name: 'Game Over',
+  nameEm: '— E-commerce Website',
+  client: 'Gaming Brand · UK',
+  category: 'theme',
+  thumb: "url('/assets/gameover-thumb.webp')",
+  shots: [
+    { src: '/assets/gameover(Halloween).jpg', label: 'Halloween Theme' },
+    { src: '/assets/go-newtemp.jpg', label: 'New Theme' },
+  ],
+  desc: `
+  <p>Game Over is a gaming-focused e-commerce website designed for a brand specializing in comfortable, stylish gaming bean bags, loungers, cushions, and accessories. It combines a bold gaming-inspired identity with a user-friendly shopping experience.</p>
+
+  <p>The design emphasizes vibrant product colors, gaming-inspired graphics, lifestyle imagery, and clear product layouts to create an engaging experience for gamers while highlighting comfort, quality, and personalization.</p>
+
+  <p><strong>Key features:</strong></p>
+  <ul>
+    <li>Product collections for gaming bean bags, loungers, footstools, cushions, and accessories</li>
+    <li>Product customization through multiple colorways and special-edition designs</li>
+    <li>Product pages highlighting comfort, materials, durability, and specifications</li>
+    <li>Shopping features including cart functionality, product variants, and promotional pricing</li>
+    <li>FAQs, delivery information, returns, and brand storytelling sections</li>
+  </ul>
+
+  <p><strong>My focus:</strong> creating a seamless, conversion-focused e-commerce experience that balances gaming aesthetics, product discovery, usability, and brand storytelling while making it easy for customers to find products that suit their gaming setup.</p>
+  `,
+  tags: ['Shopify', 'Liquid', 'JavaScript', 'E-commerce'],url:'https://quickfoam.co.uk/'
+},
+
+    {
+  id: '04',
+  name: 'Ready Steady Bed',
+  nameEm: '— E-commerce Website',
+  client: 'Children’s Home & Bedding Brand · UK',
+  category: 'theme',
+  thumb: "url('/assets/rsb-thumb.webp')",
+  shots: [
+    { src: '/assets/rsb(Halloween).jpg', label: 'Halloween Theme' },
+    { src: '/assets/rsb-newtemp.jpg', label: 'New Theme' },
+  ],
+  desc: `
+  <p>Ready Steady Bed is a family-focused e-commerce website specializing in children's bedding, soft furnishings, fold-out beds, bean bags, play sofas, and bedroom accessories. The website brings together playful designs, practical furniture, and coordinated collections to help parents create comfortable and colorful spaces for their children.</p>
+
+  <p>The design focuses on vibrant product patterns, child-friendly visuals, lifestyle imagery, and organized product categories to create a welcoming shopping experience. Clear product information, promotional highlights, and intuitive navigation help customers discover products that combine comfort, functionality, and style.</p>
+
+  <p><strong>Key features:</strong></p>
+  <ul>
+    <li>Organized product collections for children's beds, bean bags, play sofas, bedding, and bedroom accessories</li>
+    <li>Product variations featuring different colors, patterns, and designs</li>
+    <li>Product pages highlighting comfort, materials, dimensions, and practical functionality</li>
+    <li>Shopping cart, product pricing, and a streamlined online purchasing experience</li>
+    <li>Customer reviews, FAQs, delivery information, and returns policies</li>
+    <li>Brand storytelling highlighting UK design, manufacturing, and quality</li>
+  </ul>
+
+  <p><strong>My focus:</strong> creating a user-friendly, conversion-focused e-commerce experience that balances playful product presentation, intuitive navigation, and clear product information while helping parents easily discover practical and stylish solutions for their children's bedrooms and play spaces.</p>
+  `,
+  tags: ['Shopify', 'Liquid', 'JavaScript', 'E-commerce'],url:'https://readysteadybed.co.uk/'},
+
+
+
+
+
+    { id:'03', name:'Lunax Marketing', nameEm:'',
     client:'Lunax · Remote',          category:'custom',
-    thumb:"url('/assets/lunax1.jpg')",
-    desc:'Lunax Marketing is an AI-driven growth agency. Built a full marketing site with Supabase backend, conversion-focused design, and AI-powered insights.',
-    tags:['Supabase','UI Design & Development','JavaScript'], url:'https://www.lunaxmarketing.com/' },
-  { id:'04', name:'Impact',          nameEm:'',
-    client:'IT Agency',               category:'headless',
+    thumb:"url('/assets/lunax.webp')",
+    desc:`<p>LUNAX is a futuristic, multi-page agency website for Lunax Marketing, an AI-driven growth agency based in Lahore, Pakistan. It presents five services (E-Commerce Management, Video Editing, Graphic Designing, Digital Marketing and Website Development) under the tagline "AI-Driven Strategies. Limitless Growth." Each service has its own dedicated page, and the site is built to turn visitors into booked calls.</p>
+
+  <p>The design uses a dark, deep-space theme with neon cyan, magenta and yellow accents. It has glassmorphism cards, a custom glowing cursor, click-spark effects, a scroll progress bar and animated Three.js backgrounds. Each page has its own visual identity, such as a wireframe globe, orbiting platform nodes, a code-rain warp grid and film-reel waveforms.</p>
+
+  <p><strong>Home page:</strong></p>
+  <ul>
+    <li>Scroll-driven 3D wireframe globe hero that scales, rotates and fades as you scroll, with a typewriter heading cycling through the services</li>
+    <li>Keyword marquee ticker and a "Selected Works" bento grid linking to all five service pages</li>
+    <li>Scrollytelling section for Mission, Vision, Values and Commitment, with a sticky image frame and a canvas-drawn 3D icosahedron that changes scene as you scroll</li>
+    <li>Client Stories carousel with responsive slides, dot navigation and touch swipe</li>
+    <li>Mobile optimisations: reduced particle counts, lower frame rate and a simplified hero for smoother performance</li>
+  </ul>
+
+  <p><strong>Built-in booking system:</strong></p>
+  <ul>
+    <li>"Schedule a Call" modal with a custom calendar (weekends disabled) and 30-minute time slots</li>
+    <li>Supabase database stores bookings, with real-time updates that mark taken slots instantly and prevent double bookings</li>
+    <li>Form validation, loading states and clear error messages</li>
+    <li>Auto-generated .ics calendar invite with 24-hour and 30-minute reminders, plus EmailJS confirmation emails to the client and the admin</li>
+  </ul>
+
+  <p><strong>E-Commerce Management page:</strong></p>
+  <ul>
+    <li>Nine marketplace cards: Shopify, Amazon, eBay, Walmart, Etsy, TikTok Shop, ManoMano, Cdiscount and Bol.com</li>
+    <li>Each card has its own brand colour glow, service list and key stats</li>
+    <li>Four-step process section (Discovery, Build, Launch, Scale)</li>
+    <li>Screenshot gallery of real client work with a full-screen lightbox, keyboard navigation and captions</li>
+  </ul>
+
+  <p><strong>Graphic Designing page:</strong></p>
+  <ul>
+    <li>Asymmetric work grid covering brand identity, social media, email campaigns, logos, UI/UX, illustration and e-commerce listing visuals</li>
+    <li>Clickable project cards that open a popup with multi-section image carousels and arrow and dot navigation</li>
+    <li>Process section (Discover, Concept, Execute, Deliver) and a capabilities grid</li>
+  </ul>
+
+  <p><strong>Video Editing page:</strong></p>
+  <ul>
+    <li>Animated hero with film-strip decorations and a Three.js waveform and film-frame scene</li>
+    <li>Vertical video grid of 14 edits across anime recaps, shows, AI content, shorts and mini vlogs</li>
+    <li>YouTube modal player with previous and next navigation, a counter and keyboard controls</li>
+  </ul>
+
+  <p><strong>Digital Marketing page:</strong></p>
+  <ul>
+    <li>Twelve disciplines in colour-coded service cards: SEO, PPC, Social Media, Content, Email, Affiliate, Influencer, CRO, Analytics, E-Commerce, Mobile and Video Marketing</li>
+    <li>Audit, Strategy, Execute and Optimise process</li>
+    <li>"Bonus Specialisms" section covering Marketing Automation, AI Marketing, Growth, Performance Marketing and ORM</li>
+  </ul>
+
+  <p><strong>Website Development page:</strong></p>
+  <ul>
+    <li>Stack showcase covering React, Next.js, Node.js, Tailwind CSS, TypeScript, Three.js, WordPress, SEO and performance, and databases and DevOps</li>
+    <li>Custom hero with a warp grid and code-rain background, optimised for performance</li>
+    <li>Performance-focused process from discovery to iteration</li>
+  </ul>
+
+  <p><strong>My focus:</strong> building an immersive, high-performance agency website that tells the brand story, showcases every service with its own identity, and converts visitors through an end-to-end booking system, balancing bold visual design, smooth animation, mobile performance and usability.</p>`,
+    tags:['Supabase','UI Design & Development','JavaScript'], url:'https://lunax-portfoilo.vercel.app/' },
+
+
+
+
+
+
+
+
+  { id:'04', name:'Blond-Clo',       nameEm:'— E-commerce Website',
+    client:'Fashion Brand',          category:'theme',
+    thumb:"url('/assets/blonde-clo.webp')",
+    desc:`<p>Blondeclo (Blonde Clothing) is a streetwear e-commerce website for a modern clothing brand built around the tagline "Here to change the clothing game! Go Blonde!" It combines bold, graphic-led product design with a clean, fast shopping experience on Shopify.</p>
+
+  <p>The design uses a minimal white layout so the clothing and graphics stand out. It pairs this with large category banners, lifestyle photography, and a social-style Instagram gallery to give the store a youthful, fashion-forward feel.</p>
+
+  <p><strong>Key features:</strong></p>
+  <ul>
+    <li>Homepage category banners for All Products, Tracksuit, Pants, New Arrivals and New Collection</li>
+    <li>New Arrivals slider with sale badges and crossed-out prices</li>
+    <li>Slide-out cart drawer with a "You might also like" upsell section and quick-add variant selection</li>
+    <li>Collection pages for Tops, Bottoms and T-Shirts</li>
+    <li>Multi-currency and country selector, with pricing in EUR and support for 200+ regions</li>
+    <li>Instagram feed section linking to the brand's social channels (Instagram, TikTok, YouTube)</li>
+    <li>Newsletter signup with a 10% first-order discount</li>
+    <li>Order tracking and support pages</li>
+  </ul>
+
+  <p><strong>My focus:</strong> creating a bold, mobile-friendly fashion store that keeps the product front and centre, makes browsing and adding to cart quick, and supports a growing international customer base.</p>`,
+    tags:['Custom Theme','Liquid','Metaobjects','Blocks'], url:'https://blondeclo.com/' },
+
+
+
+
+  
+
+
+
+
+  { id:'05', name:'Impact',          nameEm:'',
+    client:'IT Agency',               category:'wordpress',
     thumb:"url('/assets/impact360s.jpg')",
     desc:'Modern WordPress website for an IT agency featuring custom design, service showcases, responsive layouts, contact forms, and SEO-friendly structure.',
     tags:['Wordpress','Elementor','SEO'], url:'http://impact360s.com/' },
-  { id:'05', name:'Cart',            nameEm:'Optimization',
-    client:'DTC Brand · Manchester',  category:'custom',
-    thumb:"linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.35)),url('/assets/quickfoam1.jpg')",
-    desc:'Cart API overhaul with custom upsell drawer, gift message system, discount stacking logic, and Shopify Flow automations for post-purchase sequences.',
-    tags:['Cart API','Shopify Flow','Liquid','JS'], url:'#' },
+
+
+
+
+
+
+
   { id:'06', name:'Video Edits',     nameEm:'',
-    client:'International',           category:'migration',
-    thumb:"url('/assets/video-edit.jpg')",
+    client:'International',           category:'video',
+    thumb:"url('/assets/video-edits.webp')",
     desc:'Professional video editing for YouTube, Shorts, Reels, and social media. Skilled in cuts, transitions, audio sync, and content optimization.',
     tags:['Premiere Pro','Filmora','Social Media','Recaps'],
     url:'https://drive.google.com/drive/folders/147y4vXeFnnGxhqDWNxG71liUO_DE2NAK?usp=drive_link' },
 ];
+
+  /* ===== PROJECT SCREENSHOTS + LIGHTBOX ===== */
+let currentShots = [];
+
+function projectBody(p) {
+  currentShots = p.shots || [];
+  const shots = currentShots.length ? `
+    <div class="pj-shots">
+     
+      <div class="pj-shots-grid">
+        ${currentShots.map((s, i) => `
+          <figure class="pj-shot" data-i="${i}">
+            ${s.label ? `<span class="pj-label">${s.label}</span>` : ''}
+            <img src="${s.src}" alt="${s.label || p.name + ' screenshot ' + (i + 1)}" decoding="async" loading="lazy">
+            ${s.caption ? `<figcaption>${s.caption}</figcaption>` : ''}
+          </figure>`).join('')}
+      </div>
+    </div>` : '';
+  return shots + p.desc;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const lb = document.createElement('div');
+  lb.id = 'pj-lb';
+  lb.innerHTML = `
+    <button class="x" aria-label="Close">✕</button>
+    <button class="p" aria-label="Previous">‹</button>
+    <figure><img alt="" draggable="false"><div class="lb-tag"></div><figcaption></figcaption></figure>
+    <button class="n" aria-label="Next">›</button>
+    <div class="c"></div>`;
+  document.body.appendChild(lb);
+
+  const img = lb.querySelector('img'),
+        tag = lb.querySelector('.lb-tag'),
+        cap = lb.querySelector('figcaption'),
+        cnt = lb.querySelector('.c'),
+        prev = lb.querySelector('.p'),
+        next = lb.querySelector('.n');
+  let i = 0;
+
+  /* ---------- ZOOM ---------- */
+  const MIN = 1, MAX = 5;
+  let scale = 1, tx = 0, ty = 0;
+
+  function apply() {
+    img.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+    lb.classList.toggle('zoomed', scale > 1);
+  }
+  function resetZoom() { scale = 1; tx = ty = 0; apply(); }
+
+  // Zoom toward the point under the mouse
+  function zoomAt(newScale, x, y) {
+    newScale = Math.min(MAX, Math.max(MIN, newScale));
+    const r = img.getBoundingClientRect();
+    const cx = r.left + r.width / 2 - tx,
+          cy = r.top + r.height / 2 - ty;
+    const mx = x - cx, my = y - cy;
+    tx = mx - (mx - tx) * newScale / scale;
+    ty = my - (my - ty) * newScale / scale;
+    scale = newScale;
+    if (scale === 1) tx = ty = 0;
+    apply();
+  }
+
+  // Mouse wheel / trackpad pinch
+  lb.addEventListener('wheel', e => {
+    if (!lb.classList.contains('open')) return;
+    e.preventDefault();
+    const speed = e.ctrlKey ? 0.01 : 0.002;   // trackpad pinch sends ctrlKey
+    zoomAt(scale * Math.exp(-e.deltaY * speed), e.clientX, e.clientY);
+  }, { passive: false });
+
+  // Double-click: zoom in to 2.5x, or back out
+  img.addEventListener('dblclick', e => {
+    scale > 1 ? resetZoom() : zoomAt(2.5, e.clientX, e.clientY);
+  });
+
+  // Drag to move around when zoomed
+  let dragging = false, moved = false, startX = 0, startY = 0;
+  img.addEventListener('pointerdown', e => {
+    if (scale === 1) return;
+    dragging = true; moved = false;
+    startX = e.clientX - tx; startY = e.clientY - ty;
+    img.setPointerCapture(e.pointerId);
+    lb.classList.add('dragging');
+  });
+  img.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    tx = e.clientX - startX; ty = e.clientY - startY;
+    moved = true;
+    apply();
+  });
+  const endDrag = () => { dragging = false; lb.classList.remove('dragging'); };
+  img.addEventListener('pointerup', endDrag);
+  img.addEventListener('pointercancel', endDrag);
+  /* ---------- END ZOOM ---------- */
+
+  function show(n) {
+    i = (n + currentShots.length) % currentShots.length;
+    const s = currentShots[i];
+    resetZoom();
+    img.src = s.src;
+    tag.textContent = s.label || '';
+    tag.style.display = s.label ? '' : 'none';
+    cap.textContent = s.caption || '';
+    cnt.textContent = (i + 1) + ' / ' + currentShots.length;
+    prev.style.display = next.style.display = currentShots.length > 1 ? '' : 'none';
+  }
+  const open  = n => { show(n); lb.classList.add('open'); };
+  const close = () => { lb.classList.remove('open'); resetZoom(); };
+
+  document.addEventListener('click', e => {
+    const s = e.target.closest('.pj-shot');
+    if (s) open(+s.dataset.i);
+  });
+
+  lb.querySelector('.x').onclick = close;
+  prev.onclick = e => { e.stopPropagation(); show(i - 1); };
+  next.onclick = e => { e.stopPropagation(); show(i + 1); };
+  lb.addEventListener('click', e => {
+    if (moved) { moved = false; return; }   // don't close after a drag
+    if (e.target === lb) close();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape')     { e.stopImmediatePropagation(); close(); }
+    if (e.key === 'ArrowRight') show(i + 1);
+    if (e.key === 'ArrowLeft')  show(i - 1);
+    if (e.key === '0')          resetZoom();
+  }, true);
+
+  // Swipe on mobile (only when not zoomed, so dragging doesn't change image)
+  let sx = 0;
+  lb.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    if (scale > 1) return;
+    const d = sx - e.changedTouches[0].clientX;
+    if (Math.abs(d) > 50) show(i + (d > 0 ? 1 : -1));
+  }, { passive: true });
+});
+// light box end
+// light box end
+
+
+
 
 (() => {
   const $ = id => document.getElementById(id);
@@ -2621,7 +3049,11 @@ const projects = [
   let last   = performance.now();
   let W = 0, H = 0, pad = 20, cols = 1;
   let lastW = 0, stageH = 0, refreshT = 0;
-
+const plainText = html => {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return d.textContent.trim();
+};
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
   /* ── Build cards for the current filter ── */
@@ -2645,7 +3077,7 @@ const projects = [
           <div class="proj-card-body">
             <div class="proj-card-num">${p.id} / ${total}</div>
             <div class="proj-card-name">${p.name}${p.nameEm ? ` <em>${p.nameEm}</em>` : ''}</div>
-            <div class="proj-card-desc">${p.desc.slice(0, 90)}…</div>
+            <div class="proj-card-desc">${plainText(p.desc).slice(0, 90)}…</div>
             <div class="proj-card-tags">${p.tags.map(t => `<span class="proj-card-tag">${t}</span>`).join('')}</div>
           </div>
           <div class="proj-card-footer">
@@ -2677,7 +3109,12 @@ const projects = [
 
     hovered = null;
     measure();
+
   }
+
+
+
+  
 
   /* ── Size the stage so every card fits with room to drift ── */
   function measure() {
@@ -2831,7 +3268,7 @@ const projects = [
     $('modalNum').textContent    = p.id + ' / ' + String(projects.length).padStart(2, '0');
     $('modalName').innerHTML     = p.name + (p.nameEm ? ' <em>' + p.nameEm + '</em>' : '');
     $('modalClient').textContent = p.client;
-    $('modalDesc').textContent   = p.desc;
+   $('modalDesc').innerHTML     = projectBody(p);
     $('modalTags').innerHTML     = p.tags.map(t => `<span class="proj-modal-tag">${t}</span>`).join('');
     $('modalCta').onclick        = () => { if (p.url !== '#') window.open(p.url, '_blank'); };
     $('projModalBg').classList.add('open');
