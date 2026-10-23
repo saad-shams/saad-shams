@@ -27,13 +27,22 @@
   --paper:    #faf8f4;
   --mid:      #d4cfc6;
 
+  /* Header drawer colours. These were used but never defined, so the
+     mobile menu links fell back to dark text on the dark drawer. */
+  --hd-border: rgba(245, 241, 234, 0.12);
+  --hd-muted:  #c4a882;
+
   --serif:    'DM Serif Display', Georgia, serif;
   --sans:     'DM Sans', system-ui, sans-serif;
   --mono:     'JetBrains Mono', monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+
+/* No CSS smooth scrolling: it fights GSAP ScrollTrigger while it measures
+   the page, which made sections jump on top of each other during load.
+   The nav links still scroll smoothly, through JavaScript. */
+html { scroll-behavior: auto; }
 
 body {
   background: var(--paper);
@@ -44,6 +53,52 @@ body {
      position:sticky (the card stack, the education title). Same clipping. */
   overflow-x: clip;
   cursor: none;
+}
+
+
+/* ─── PAGE LOADER ─── */
+/* Scrolling is locked until the page and its scroll animations are ready */
+html.is-loading,
+html.is-loading body { overflow: hidden; }
+
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;            /* above the page; the cursor + lightning stay on top */
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: progress;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+#loader.ld-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.ld-count {
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--serif);
+  font-size: clamp(4.5rem, 16vw, 10rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--warm);
+}
+#ldNum {
+  display: inline-block;
+  min-width: 1.7em;          /* fits "100", so the number doesn't jiggle */
+  text-align: right;
+}
+.ld-pct {
+  font-size: 0.3em;
+  font-style: italic;
+  color: var(--gold);
+  margin: 0.4em 0 0 0.15em;
+}
+@media (prefers-reduced-motion: reduce) {
+  #loader { transition: none; }
 }
 
 
@@ -63,16 +118,16 @@ body {
     backdrop-filter 0.4s ease,
     box-shadow     0.4s ease;
 }
- 
+
 /* scrolled state */
 .hd-header.hd-scrolled {
   /* background: var(--ink-opa); */
-   border-bottom-color: var(--hd-border); 
+  border-bottom-color: var(--hd-border);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 4px 40px rgba(0, 0, 0, 0,35);
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.35);
 }
- 
+
 /* ── inner ── */
 .hd-inner {
   display: flex;
@@ -83,7 +138,7 @@ body {
   max-width: 1600px;
   margin: 0 auto;
 }
- 
+
 /* ── logo ── */
 .hd-logo {
   font-family: var(--serif);
@@ -99,14 +154,23 @@ body {
 }
 .hd-logo em { font-style: italic; color: var(--gold); }
 .hd-logo:hover { opacity: 0.8; }
- 
+
+/* ── right-hand group: nav + CTA + burger ── */
+.hd-right {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-right: 2rem;        /* same spacing the old wrapper gave on desktop */
+  flex-shrink: 0;
+}
+
 /* ── desktop nav ── */
 .hd-nav {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
- 
+
 .hd-nav-link {
   font-family: var(--mono);
   font-size: 0.65rem;
@@ -133,7 +197,7 @@ body {
 .hd-nav-link:hover::after { transform: scaleX(1); }
 .hd-nav-link.hd-active { color: var(--gold); }
 .hd-nav-link.hd-active::after { transform: scaleX(1); }
- 
+
 /* ── CTA button ── */
 .hd-cta {
   font-family: var(--mono);
@@ -162,7 +226,7 @@ body {
 }
 .hd-cta svg { transition: transform 0.3s ease; }
 .hd-cta:hover svg { transform: translateX(3px); }
- 
+
 /* ── availability pill ── */
 .hd-avail {
   display: flex;
@@ -187,7 +251,7 @@ body {
   0%,100% { box-shadow: 0 0 0 0   rgba(74,222,128,0.4); }
   50%      { box-shadow: 0 0 0 5px rgba(74,222,128,0);   }
 }
- 
+
 /* ── hamburger button ── */
 .hd-burger {
   display: none;
@@ -215,12 +279,12 @@ body {
               width     0.3s ease;
   transform-origin: center;
 }
- 
+
 /* burger → X when open */
 .hd-header.hd-open .hd-burger-bar:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
 .hd-header.hd-open .hd-burger-bar:nth-child(2) { opacity: 0; width: 0; }
 .hd-header.hd-open .hd-burger-bar:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
- 
+
 /* ── mobile drawer ── */
 .hd-drawer {
   position: fixed;
@@ -229,7 +293,7 @@ body {
   border-bottom: 1px solid var(--gold);
   z-index: 8999;
   overflow: hidden;
- 
+
   /* closed */
   max-height: 0;
   opacity: 0;
@@ -243,17 +307,17 @@ body {
   opacity: 1;
   pointer-events: all;
 }
- 
+
 .hd-drawer-inner {
   padding: 1.5rem 2rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
- 
+
 .hd-drawer-link {
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--hd-muted);
@@ -266,7 +330,8 @@ body {
   transition: color 0.25s ease;
 }
 .hd-drawer-link:last-of-type { border-bottom: none; }
-.hd-drawer-link:hover { color: var(--warm); }
+.hd-drawer-link:hover,
+.hd-drawer-link.hd-active { color: var(--warm); }
 .hd-drawer-link::after {
   content: '↗';
   font-size: 0.75rem;
@@ -274,8 +339,9 @@ body {
   opacity: 0;
   transition: opacity 0.25s;
 }
-.hd-drawer-link:hover::after { opacity: 1; }
- 
+.hd-drawer-link:hover::after,
+.hd-drawer-link.hd-active::after { opacity: 1; }
+
 .hd-drawer-cta {
   display: inline-flex;
   align-items: center;
@@ -294,19 +360,20 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 .hd-drawer-cta:hover { background: transparent; color: var(--gold); }
- 
-/* ── responsive breakpoints ── */
+
+/* ── responsive breakpoints ──
+   The burger takes over at 900px: below that the full nav doesn't fit. */
 @media (max-width: 900px) {
-  .hd-inner { padding: 0 2rem; }
-  .hd-avail { display: none; }
-}
- 
-@media (max-width: 768px) {
-  .hd-nav  { display: none; }
-  .hd-cta  { display: none; }
+  .hd-inner  { padding: 0 2rem; }
+  .hd-right  { margin-right: 0; }
+  .hd-nav,
+  .hd-cta    { display: none; }
   .hd-burger { display: flex; }
 }
- 
+@media (min-width: 901px) {
+  .hd-drawer { display: none; }
+}
+
 @media (max-width: 480px) {
   .hd-inner { padding: 0 1.25rem; }
 }
@@ -1586,7 +1653,7 @@ display: none;
   position: relative;
   overflow: hidden;
 }
- 
+
 /* ── grain texture ── */
 .ft-footer::before {
   content: '';
@@ -1595,7 +1662,7 @@ display: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   pointer-events: none;
 }
- 
+
 /* ── CTA band ── */
 .ft-cta-band {
   padding: 7rem 4rem 5rem;
@@ -1603,7 +1670,7 @@ display: none;
   position: relative;
   z-index: 1;
 }
- 
+
 .ft-cta-eyebrow {
   font-family: var(--mono);
   font-size: 0.62rem;
@@ -1621,7 +1688,7 @@ display: none;
   width: 2rem; height: 1px;
   background: var(--paper);
 }
- 
+
 .ft-cta-heading {
   font-family: var(--serif);
   font-size: clamp(2.8rem, 6vw, 6rem);
@@ -1636,7 +1703,7 @@ display: none;
   font-style: italic;
   color: var(--gold);
 }
- 
+
 /* ── action buttons row ── */
 .ft-actions {
   display: flex;
@@ -1644,7 +1711,7 @@ display: none;
   gap: 1rem;
   flex-wrap: wrap;
 }
- 
+
 /* Primary — Email */
 .ft-btn-email {
   display: inline-flex;
@@ -1668,7 +1735,7 @@ display: none;
 }
 .ft-btn-email svg { flex-shrink: 0; transition: transform 0.3s ease; }
 .ft-btn-email:hover svg { transform: translateX(3px); }
- 
+
 /* WhatsApp button */
 .ft-btn-wa {
   display: inline-flex;
@@ -1699,13 +1766,13 @@ display: none;
 .ft-btn-wa:hover::before { transform: scaleX(1); }
 .ft-btn-wa:hover { border-color: #25D366; transform: translateY(-2px); }
 .ft-btn-wa span, .ft-btn-wa svg { position: relative; z-index: 1; }
- 
+
 /* WhatsApp icon */
 .ft-wa-icon {
   width: 16px; height: 16px;
   flex-shrink: 0;
 }
- 
+
 /* ── info grid ── */
 .ft-info-grid {
   display: grid;
@@ -1714,7 +1781,7 @@ display: none;
   position: relative;
   z-index: 1;
 }
- 
+
 .ft-info-cell {
   padding: 2.5rem 4rem 2.5rem 0;
   border-right: 1px solid var(--stone);
@@ -1722,7 +1789,7 @@ display: none;
 }
 .ft-info-cell:first-child { margin-left: 0; padding-left: 4rem; }
 .ft-info-cell:last-child  { border-right: none; }
- 
+
 .ft-info-label {
   font-family: var(--mono);
   font-size: 0.58rem;
@@ -1740,7 +1807,7 @@ display: none;
   transition: color 0.25s;
 }
 a.ft-info-val:hover { color: var(--gold); }
- 
+
 /* availability dot */
 .ft-avail {
   display: flex;
@@ -1759,7 +1826,7 @@ a.ft-info-val:hover { color: var(--gold); }
   0%,100% { box-shadow: 0 0 0 0   rgba(74,222,128,0.4); }
   50%      { box-shadow: 0 0 0 6px rgba(74,222,128,0);   }
 }
- 
+
 /* ── bottom bar ── */
 .ft-bottom {
   padding: 1.75rem 4rem;
@@ -1769,7 +1836,7 @@ a.ft-info-val:hover { color: var(--gold); }
   position: relative;
   z-index: 1;
 }
- 
+
 .ft-bottom-logo {
   font-family: var(--serif);
   font-size: 1.1rem;
@@ -1777,7 +1844,7 @@ a.ft-info-val:hover { color: var(--gold); }
   letter-spacing: -0.01em;
 }
 .ft-bottom-logo em { font-style: italic; color: var(--gold); }
- 
+
 .ft-bottom-copy {
   font-family: var(--mono);
   font-size: 0.58rem;
@@ -1785,7 +1852,7 @@ a.ft-info-val:hover { color: var(--gold); }
   text-transform: uppercase;
   color: var(--ft-muted);
 }
- 
+
 .ft-bottom-links {
   display: flex;
   gap: 2rem;
@@ -1801,7 +1868,7 @@ a.ft-info-val:hover { color: var(--gold); }
   transition: color 0.25s;
 }
 .ft-bottom-links a:hover { color: var(--gold); }
- 
+
 /* ── big watermark ── */
 .ft-watermark {
   position: absolute;
@@ -1818,7 +1885,7 @@ a.ft-info-val:hover { color: var(--gold); }
   white-space: nowrap;
   z-index: 0;
 }
- 
+
 /* ── responsive ── */
 @media (max-width: 900px) {
   .ft-cta-band  { padding: 5rem 2rem 4rem; }
@@ -1829,7 +1896,7 @@ a.ft-info-val:hover { color: var(--gold); }
   .ft-info-cell:nth-child(4)    { border-top: 1px solid var(--ft-border); }
   .ft-bottom { padding: 1.5rem 2rem; flex-wrap: wrap; gap: 1rem; }
 }
- 
+
 @media (max-width: 560px) {
   .ft-cta-band  { padding: 4rem 1.5rem 3rem; }
   .ft-info-grid { grid-template-columns: 1fr; }
@@ -1847,8 +1914,73 @@ a.ft-info-val:hover { color: var(--gold); }
 
 
 </style>
+<!-- Without JavaScript the loader could never finish, so hide it -->
+<noscript><style>#loader { display: none; }</style></noscript>
 </head>
 <body>
+
+<!-- ════════ PAGE LOADER ════════
+     Covers the page until it has fully loaded and the scroll animations
+     are measured, so nothing can be scrolled into a half-built layout. -->
+<div id="loader" role="status" aria-label="Loading">
+  <div class="ld-count"><span id="ldNum">0</span><span class="ld-pct">%</span></div>
+</div>
+<script>
+/* Runs before everything else, so the counter starts straight away.
+   It creeps toward 90% while the page loads, then runs up to 100%
+   once the site calls ldLoader.complete(). */
+(function () {
+  var root   = document.documentElement;
+  var loader = document.getElementById('loader');
+  var numEl  = document.getElementById('ldNum');
+  var start  = performance.now();
+  var shown  = 0, loaded = false, finished = false, callbacks = [];
+  var SCROLL_KEYS = [' ', 'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End'];
+
+  root.classList.add('is-loading');
+
+  // Block wheel, touch and keyboard scrolling while the loader is up
+  function block(e) { e.preventDefault(); }
+  function blockKeys(e) { if (SCROLL_KEYS.indexOf(e.key) !== -1) e.preventDefault(); }
+  loader.addEventListener('wheel', block, { passive: false });
+  loader.addEventListener('touchmove', block, { passive: false });
+  window.addEventListener('keydown', blockKeys);
+
+  function unlock() { root.classList.remove('is-loading'); }
+
+  function finish() {
+    finished = true;
+    unlock();
+    window.removeEventListener('keydown', blockKeys);
+    loader.classList.add('ld-done');
+    callbacks.forEach(function (fn) {
+      try { fn(); } catch (err) { console.error(err); }
+    });
+    callbacks = [];
+    setTimeout(function () { loader.remove(); }, 800);
+  }
+
+  function tick(now) {
+    var t = (now - start) / 1000;
+    var target = loaded ? 100 : 90 * (1 - Math.exp(-t / 1.4));
+    shown += (target - shown) * (loaded ? 0.12 : 0.08);
+    if (loaded && shown > 99.5) shown = 100;
+    numEl.textContent = Math.floor(shown);
+    if (shown >= 100) { finish(); return; }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Failsafe: if something breaks, never leave anyone stuck on the loader
+  setTimeout(function () { loaded = true; }, 12000);
+
+  window.ldLoader = {
+    unlock:   unlock,                               // give the scrollbar back (loader stays visible)
+    complete: function () { loaded = true; },       // run the counter to 100% and fade out
+    onDone:   function (fn) { finished ? fn() : callbacks.push(fn); }
+  };
+})();
+</script>
 
 <!-- CURSOR -->
 <div id="cursor-ring"></div>
@@ -1861,49 +1993,53 @@ a.ft-info-val:hover { color: var(--gold); }
 <!-- ════════ HEADER ════════ -->
 <header class="hd-header" id="hdHeader">
   <div class="hd-inner">
- 
+
     <!-- Logo -->
     <a href="#hero" class="hd-logo">Saad <em>Shams</em></a>
- 
-    <!-- Availability pill — hidden on mobile -->
-    <div class="hd-avail">
-    
- 
-    <!-- Desktop nav -->
-    <nav class="hd-nav" aria-label="Main navigation">
-      <a href="#experience" class="hd-nav-link">Experties</a>
-      <a href="#expv-section" class="hd-nav-link">Experience</a>
-      <a href="#projects"       class="hd-nav-link">Projects</a>
-      <a href="#education"  class="hd-nav-link">Education</a>
-      <a href="#footer"    class="hd-nav-link">Contact</a>
-    </nav>
- 
-    <!-- Desktop CTA -->
-    <a href="https://wa.me/923219424370" target="_blank" rel="noopener" class="hd-cta">
-      Hire me
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M2 6.5h9M7 2.5l4 4-4 4"/>
-      </svg>
-    </a>
- 
-    <!-- Hamburger — mobile only -->
-    <button class="hd-burger" id="hdBurger" aria-label="Toggle menu" aria-expanded="false">
-      <span class="hd-burger-bar"></span>
-      <span class="hd-burger-bar"></span>
-      <span class="hd-burger-bar"></span>
-    </button>
- 
+
+    <!-- Right side: nav + CTA on desktop, burger on mobile.
+         This replaces the old .hd-avail div, which was never closed. It
+         wrapped the burger, and .hd-avail is hidden below 900px, so the
+         burger disappeared on mobile. -->
+    <div class="hd-right">
+
+      <!-- Desktop nav -->
+      <nav class="hd-nav" aria-label="Main navigation">
+        <a href="#experience"   class="hd-nav-link">Experties</a>
+        <a href="#expv-section" class="hd-nav-link">Experience</a>
+        <a href="#projects"     class="hd-nav-link">Projects</a>
+        <a href="#education"    class="hd-nav-link">Education</a>
+        <a href="#footer"       class="hd-nav-link">Contact</a>
+      </nav>
+
+      <!-- Desktop CTA -->
+      <a href="https://wa.me/923219424370" target="_blank" rel="noopener" class="hd-cta">
+        Hire me
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 6.5h9M7 2.5l4 4-4 4"/>
+        </svg>
+      </a>
+
+      <!-- Hamburger — mobile only -->
+      <button class="hd-burger" id="hdBurger" aria-label="Toggle menu" aria-expanded="false" aria-controls="hdDrawer">
+        <span class="hd-burger-bar"></span>
+        <span class="hd-burger-bar"></span>
+        <span class="hd-burger-bar"></span>
+      </button>
+
+    </div>
+
   </div>
 </header>
- 
+
 <!-- Mobile drawer — sits right after header in DOM -->
 <div class="hd-drawer" id="hdDrawer" aria-hidden="true">
   <div class="hd-drawer-inner">
-    <a href="#experience" class="hd-nav-link">Experties</a>
-      <a href="#expv-section" class="hd-nav-link">Experience</a>
-      <a href="#projects"       class="hd-nav-link">Projects</a>
-      <a href="#education"  class="hd-nav-link">Education</a>
-      <a href="#footer"    class="hd-nav-link">Contact</a>
+    <a href="#experience"   class="hd-drawer-link">Experties</a>
+    <a href="#expv-section" class="hd-drawer-link">Experience</a>
+    <a href="#projects"     class="hd-drawer-link">Projects</a>
+    <a href="#education"    class="hd-drawer-link">Education</a>
+    <a href="#footer"       class="hd-drawer-link">Contact</a>
     <a href="https://wa.me/923219424370" target="_blank" rel="noopener" class="hd-drawer-cta">
       Hire me on WhatsApp →
     </a>
@@ -2288,19 +2424,19 @@ a.ft-info-val:hover { color: var(--gold); }
 
 
 <footer class="ft-footer" id="footer">
- 
+
   <!-- big watermark behind everything -->
   <div class="ft-watermark" aria-hidden="true">Saad</div>
- 
+
   <!-- ── CTA BAND ── -->
   <div class="ft-cta-band">
     <div class="ft-cta-eyebrow">Open to work</div>
     <h2 class="ft-cta-heading">
       Let's build something<br><em>worth scrolling for.</em>
     </h2>
- 
+
     <div class="ft-actions">
- 
+
       <!-- Email CTA -->
       <a href="mailto:saadshams@email.com" class="ft-btn-email">
         <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4">
@@ -2312,7 +2448,7 @@ a.ft-info-val:hover { color: var(--gold); }
           <path d="M2 7h10M8 3l4 4-4 4"/>
         </svg>
       </a>
- 
+
       <!-- WhatsApp CTA -->
       <a href="https://wa.me/923104725492" target="_blank" rel="noopener" class="ft-btn-wa">
         <!-- WhatsApp SVG icon -->
@@ -2321,28 +2457,28 @@ a.ft-info-val:hover { color: var(--gold); }
         </svg>
         <span>WhatsApp me</span>
       </a>
- 
+
     </div>
   </div>
- 
+
   <!-- ── INFO GRID ── -->
   <div class="ft-info-grid">
- 
+
     <div class="ft-info-cell">
       <div class="ft-info-label">Based in</div>
       <div class="ft-info-val">Pakistan — Remote Ready</div>
     </div>
- 
+
     <div class="ft-info-cell">
       <div class="ft-info-label">Email</div>
       <a href="mailto:saadshams@email.com" class="ft-info-val">saadshams370@gmail.com</a>
     </div>
- 
+
     <div class="ft-info-cell">
       <div class="ft-info-label">WhatsApp</div>
       <a href="https://wa.me/923219424370" target="_blank" rel="noopener" class="ft-info-val">+92 321-9424370</a>
     </div>
- 
+
     <div class="ft-info-cell">
       <div class="ft-info-label">Availability</div>
       <div class="ft-info-val ft-avail">
@@ -2350,22 +2486,22 @@ a.ft-info-val:hover { color: var(--gold); }
         Open to opportunities
       </div>
     </div>
- 
+
   </div>
- 
+
   <!-- ── BOTTOM BAR ── -->
   <div class="ft-bottom">
     <div class="ft-bottom-logo">Saad <em>Shams</em></div>
- 
+
     <p class="ft-bottom-copy">© 2026 — Shopify Developer</p>
- 
+
     <ul class="ft-bottom-links">
       <li><a href="https://www.linkedin.com/in/saad-shams-788092272" target="_blank" rel="noopener">LinkedIn</a></li>
       <!-- <li><a href="https://github.com/saadshams"      target="_blank" rel="noopener">GitHub</a></li> -->
       <li><a href="mailto:saadshams370@gmail.com">Gmail</a></li>
     </ul>
   </div>
- 
+
 </footer>
 
 
@@ -2377,8 +2513,12 @@ a.ft-info-val:hover { color: var(--gold); }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
-gsap.registerPlugin(ScrollTrigger);
-ScrollTrigger.config({ ignoreMobileResize: true });
+/* If the GSAP CDN ever fails, keep the rest of the site (menu, projects) working */
+const hasGSAP = !!(window.gsap && window.ScrollTrigger);
+if (hasGSAP) {
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
+}
 
 /* ══════════════════════════════════════
    HEADER
@@ -2388,6 +2528,7 @@ ScrollTrigger.config({ ignoreMobileResize: true });
   const burger = document.getElementById('hdBurger');
   const drawer = document.getElementById('hdDrawer');
   const links  = drawer.querySelectorAll('.hd-drawer-link, .hd-drawer-cta');
+  const HEADER_H = 68;
 
   function onScroll() {
     header.classList.toggle('hd-scrolled', window.scrollY > 20);
@@ -2397,7 +2538,8 @@ ScrollTrigger.config({ ignoreMobileResize: true });
       const el = document.getElementById(id);
       if (el && window.scrollY >= el.offsetTop - 120) current = id;
     });
-    document.querySelectorAll('.hd-nav-link').forEach(a => {
+    // highlight the current section in both the desktop nav and the mobile drawer
+    document.querySelectorAll('.hd-nav-link, .hd-drawer-link').forEach(a => {
       a.classList.toggle('hd-active', a.getAttribute('href') === '#' + current);
     });
   }
@@ -2407,8 +2549,8 @@ ScrollTrigger.config({ ignoreMobileResize: true });
   function toggleMenu(force) {
     const isOpen = force !== undefined ? force : !header.classList.contains('hd-open');
     header.classList.toggle('hd-open', isOpen);
-    burger.setAttribute('aria-expanded', isOpen);
-    drawer.setAttribute('aria-hidden', !isOpen);
+    burger.setAttribute('aria-expanded', String(isOpen));
+    drawer.setAttribute('aria-hidden', String(!isOpen));
     document.body.style.overflow = isOpen ? 'hidden' : '';
   }
 
@@ -2423,7 +2565,21 @@ ScrollTrigger.config({ ignoreMobileResize: true });
     if (e.key === 'Escape' && header.classList.contains('hd-open')) toggleMenu(false);
   });
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 768 && header.classList.contains('hd-open')) toggleMenu(false);
+    if (window.innerWidth > 900 && header.classList.contains('hd-open')) toggleMenu(false);
+  });
+
+  // In-page links (#projects etc.) scroll smoothly and stop just below
+  // the fixed header, instead of hiding the section title under it.
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute('href').slice(1);
+    const target = id && document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    const offset = id === 'hero' ? 0 : HEADER_H;
+    const y = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
   });
 })();
 
@@ -3018,7 +3174,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }, { passive: true });
 });
 // light box end
-// light box end
 
 
 
@@ -3470,23 +3625,33 @@ const plainText = html => {
 })();
 
 /* ══════════════════════════════════════
-   ALL GSAP ANIMATIONS — inside window.load
-   so ScrollTrigger measures are correct
+   STARTUP — loader → scroll animations → hero intro
+   1. The loader covers the page while it loads.
+   2. On window "load" (all images + fonts in), the scroll
+      animations are built and measured, still under the loader.
+   3. The counter runs to 100%, the loader fades out, and the
+      hero intro plays. Nothing can be scrolled into a half-built
+      layout any more.
 ══════════════════════════════════════ */
-window.addEventListener('load', () => {
 
-  /* save scroll, jump to top so pin spacer is measured from 0 */
-  const savedScroll = window.scrollY;
-  window.scrollTo(0, 0);
-
-  /* ── Hero entrance ── */
+/* Hero starts hidden (it's under the loader) and animates in once it lifts */
+if (hasGSAP) {
   gsap.set(['#hero-label','#hero-name','#hero-skill-wrap'], { opacity:0, y:30 });
   gsap.set('#hero-img-block', { opacity:0, x:40 });
-  gsap.timeline({ delay:0.2 })
+}
+
+function playHeroIntro() {
+  if (!hasGSAP) return;
+  gsap.timeline({ delay:0.15 })
     .to('#hero-label',      { opacity:1, y:0, duration:0.9, ease:'power3.out' })
     .to('#hero-name',       { opacity:1, y:0, duration:1,   ease:'power3.out' }, '-=0.5')
     .to('#hero-skill-wrap', { opacity:1, y:0, duration:0.8, ease:'power3.out' }, '-=0.4')
     .to('#hero-img-block',  { opacity:1, x:0, duration:1,   ease:'power3.out' }, '-=0.6');
+}
+
+function initScrollAnimations() {
+  /* measure everything from the top of the page */
+  window.scrollTo(0, 0);
 
   /* ── Horizontal scroll (Expertise) ── */
   const track        = document.getElementById('expTrack');
@@ -3539,14 +3704,38 @@ window.addEventListener('load', () => {
     });
   });
 
-  /* refresh then restore scroll */
   ScrollTrigger.refresh();
-  requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, savedScroll)));
-  // Re-enable smooth scroll after GSAP is set up
-  setTimeout(() => {
-    document.documentElement.style.scrollBehavior = 'smooth';
-  }, 100);
+
+  /* opened with a link like /#projects? jump there now that everything is measured */
+  const hashTarget = location.hash && document.getElementById(location.hash.slice(1));
+  if (hashTarget) {
+    window.scrollTo(0, hashTarget.getBoundingClientRect().top + window.scrollY - 68);
+  }
+}
+
+let siteReady = false;
+function startSite() {
+  if (siteReady) return;
+  siteReady = true;
+  window.ldLoader.unlock();     // scrollbar back BEFORE measuring, so pinned widths are right
+  if (hasGSAP) {
+    initScrollAnimations();     // still hidden under the loader
+  } else {
+    // no GSAP: just show the timeline items it would have animated in
+    document.querySelectorAll('.edu-item').forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; });
+  }
+  window.ldLoader.complete();   // counter runs to 100%, then the loader fades
+}
+
+window.ldLoader.onDone(playHeroIntro);
+
+window.addEventListener('load', () => {
+  if (siteReady) { if (hasGSAP) ScrollTrigger.refresh(); }   // late images after the failsafe start
+  else startSite();
 });
+
+/* Failsafe: a very slow image shouldn't keep the loader up forever */
+setTimeout(startSite, 10000);
 </script>
  
 
