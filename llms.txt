@@ -1,9 +1,10 @@
-# Saad Shams — Shopify Developer in Pakistan
+# Saad Shams — Shopify Developer & Web Developer in Pakistan
 
-> Saad Shams is a Shopify developer based in Pakistan. He builds custom Shopify themes, Liquid sections and store features for e-commerce brands in Pakistan, the UK and worldwide, and works remotely with businesses anywhere in Pakistan.
+> Saad Shams is a Shopify developer and freelance web developer based in Pakistan. He builds ecommerce websites, Shopify stores, WordPress sites and React web apps for businesses in Pakistan, the UK and worldwide, and works remotely with clients anywhere in Pakistan.
 
 ## Services
 
+- Ecommerce website development on Shopify and WordPress/WooCommerce
 - Custom Shopify theme development and customization
 - Liquid sections and blocks, metafields and metaobjects
 - AJAX cart and Shopify Cart API work, bundle builders, product calculators
