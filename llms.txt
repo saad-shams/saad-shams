@@ -1,0 +1,35 @@
+# Saad Shams — Shopify Developer in Pakistan
+
+> Saad Shams is a Shopify developer based in Pakistan. He builds custom Shopify themes, Liquid sections and store features for e-commerce brands in Pakistan, the UK and worldwide, and works remotely with businesses anywhere in Pakistan.
+
+## Services
+
+- Custom Shopify theme development and customization
+- Liquid sections and blocks, metafields and metaobjects
+- AJAX cart and Shopify Cart API work, bundle builders, product calculators
+- Shopify Flow automations and B2B trade setups
+- Shipping configuration, store speed and SEO fixes
+- WordPress and WooCommerce sites (including Elementor)
+- React and Node.js web applications
+
+## Selected work
+
+- [Quick Foam](https://quickfoam.co.uk/): UK foam supplier. Cut-to-size foam calculator inside the Shopify theme, covering 20+ shapes with live pricing and cutting details sent to the workshop.
+- [Zonky](https://zonky.uk/): Shopify store for a modular kids' play sofa brand.
+- [Game Over](https://gameoverstore.co.uk/): Shopify store for gaming bean bags and loungers.
+- [Ready Steady Bed](https://readysteadybed.co.uk/): Shopify store for children's beds, bedding and play furniture.
+- [Blonde Clothing](https://blondeclo.com/): Shopify streetwear store.
+
+## Experience
+
+- TriVA — Shopify Developer (2025–present)
+- Devion — Shopify Developer, UK e-commerce clients (2024–2025)
+- Codiveo — React Developer intern (2023)
+- Freelance — WordPress and video editing (2022)
+
+## Contact
+
+- Website: https://saadshams.vercel.app/
+- Email: saadshams370@gmail.com
+- WhatsApp: +92 321-9424370
+- LinkedIn: https://www.linkedin.com/in/saad-shams-788092272
