@@ -1,4 +1,21 @@
+# Search engines and AI assistants are welcome to read this site.
 User-agent: *
+Allow: /
+
+# AI search crawlers, listed by name so it's explicit
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
 Allow: /
 
 Sitemap: https://saadshams.vercel.app/sitemap.xml
